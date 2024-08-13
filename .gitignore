@@ -1,0 +1,11 @@
+Pipfile
+Pipfile.lock
+db.sqlite3
+.env
+.idea
+venv
+*.pyc
+*.swp
+*/migrations/*
+!*/migrations/__init__.py
+media/
