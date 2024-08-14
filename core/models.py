@@ -4,7 +4,15 @@ from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
 
-class Profile(AbstractUser):
+class TimeStampedAbstractModel(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+
+
+class Profile(TimeStampedAbstractModel, AbstractUser):
     username = models.CharField(max_length=255, unique=True, verbose_name="نام کاربری")
     password = models.CharField(max_length=255, verbose_name="رمزعبور")
     first_name = models.CharField(max_length=255, verbose_name="نام")
@@ -17,11 +25,3 @@ class Profile(AbstractUser):
     class Meta:
         verbose_name = "پروفایل"
         verbose_name_plural = "پروفایل ها"
-
-
-class TimeStampedAbstractModel(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        abstract = True
