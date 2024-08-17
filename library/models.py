@@ -18,7 +18,7 @@ class Category(models.Model):
         return self.title
 
 
-class Book(TimeStampedAbstractModel):
+class Book(TimeStampedAbstractModel, models.Model):
     title = models.CharField(max_length=255, verbose_name="عنوان کتاب")
     author = models.CharField(max_length=255, verbose_name="نویسنده")
     translator = models.CharField(max_length=255, blank=True, null=True, verbose_name="مترجم")
@@ -40,7 +40,7 @@ class Book(TimeStampedAbstractModel):
         return self.title
 
 
-class Review(TimeStampedAbstractModel):
+class Review(TimeStampedAbstractModel, models.Model):
     user = models.ForeignKey('Profile', on_delete=models.SET_NULL, null=True, related_name="reviews",
                              verbose_name="کاربر")
     book = models.ForeignKey('Book', on_delete=models.SET_NULL, null=True, related_name="reviews", verbose_name="کتاب")
@@ -62,7 +62,7 @@ class Review(TimeStampedAbstractModel):
         return f"{self.user} - {self.book} ({self.score})"
 
 
-class Notification(models.Model):
+class Notification(TimeStampedAbstractModel, models.Model):
     user = models.ForeignKey('Profile', on_delete=models.SET_NULL, null=True, related_name="notifications",
                              verbose_name="کاربر")
     book = models.ForeignKey('Book', on_delete=models.SET_NULL, null=True, related_name="notifications",
@@ -85,7 +85,7 @@ class Notification(models.Model):
         return self.title
 
 
-class BaseRequestModel(models.Model):
+class BaseRequestModel(TimeStampedAbstractModel, models.Model):
     user = models.ForeignKey('Profile', on_delete=models.CASCADE, verbose_name="کاربر")
     book = models.ForeignKey('Book', on_delete=models.CASCADE, verbose_name="کتاب")
 
@@ -101,7 +101,7 @@ class BaseRequestModel(models.Model):
         abstract = True
 
 
-class BorrowRequest(BaseRequestModel):
+class BorrowRequest(BaseRequestModel, models.Model):
     TIME_CHOICES = [
         (14, '14 Days'),
         (30, '30 Days'),
@@ -113,7 +113,7 @@ class BorrowRequest(BaseRequestModel):
         verbose_name_plural = "درخواست‌های امانت"
 
 
-class ExtensionRequest(BaseRequestModel):
+class ExtensionRequest(BaseRequestModel, models.Model):
     TIME_CHOICES = [
         (3, '3 Days'),
         (5, '5 Days'),
@@ -126,7 +126,7 @@ class ExtensionRequest(BaseRequestModel):
         verbose_name_plural = "درخواست‌های تمدید"
 
 
-class ReviewRequest(BaseRequestModel):
+class ReviewRequest(BaseRequestModel, models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('accepted', 'Accepted'),
@@ -136,3 +136,14 @@ class ReviewRequest(BaseRequestModel):
     class Meta:
         verbose_name = "درخواست بررسی"
         verbose_name_plural = "درخواست‌های بررسی"
+
+
+class History(TimeStampedAbstractModel, models.Model):
+    user = models.ForeignKey('Profile', on_delete=models.CASCADE, verbose_name="کاربر")
+    book = models.ForeignKey('Book', on_delete=models.CASCADE, verbose_name="کتاب")
+    request = models.ForeignKey('BaseRequestModel', on_delete=models.CASCADE, null=True, blank=True,
+                                verbose_name="درخواست")
+
+    class Meta:
+        verbose_name = "تاریخچه"
+        verbose_name_plural = "تاریخچه‌ها"
