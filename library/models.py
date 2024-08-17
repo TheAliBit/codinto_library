@@ -85,3 +85,54 @@ class Notification(models.Model):
         return self.title
 
 
+class BaseRequestModel(models.Model):
+    user = models.ForeignKey('Profile', on_delete=models.CASCADE, verbose_name="کاربر")
+    book = models.ForeignKey('Book', on_delete=models.CASCADE, verbose_name="کتاب")
+
+    STATUS_CHOICES = [
+        ('rejected', 'Rejected'),
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+    ]
+    status = models.CharField(max_length=8, choices=STATUS_CHOICES, default='pending', verbose_name="وضعیت")
+    duration = models.IntegerField(verbose_name="مدت زمان (روز)")
+
+    class Meta:
+        abstract = True
+
+
+class BorrowRequest(BaseRequestModel):
+    TIME_CHOICES = [
+        (14, '14 Days'),
+        (30, '30 Days'),
+    ]
+    time = models.IntegerField(choices=TIME_CHOICES, verbose_name="مدت زمان امانت")
+
+    class Meta:
+        verbose_name = "درخواست امانت"
+        verbose_name_plural = "درخواست‌های امانت"
+
+
+class ExtensionRequest(BaseRequestModel):
+    TIME_CHOICES = [
+        (3, '3 Days'),
+        (5, '5 Days'),
+        (7, '7 Days'),
+    ]
+    time = models.IntegerField(choices=TIME_CHOICES, verbose_name="مدت زمان تمدید")
+
+    class Meta:
+        verbose_name = "درخواست تمدید"
+        verbose_name_plural = "درخواست‌های تمدید"
+
+
+class ReviewRequest(BaseRequestModel):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+    ]
+    status = models.CharField(max_length=8, choices=STATUS_CHOICES, default='pending', verbose_name="وضعیت")
+
+    class Meta:
+        verbose_name = "درخواست بررسی"
+        verbose_name_plural = "درخواست‌های بررسی"
