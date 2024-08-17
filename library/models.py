@@ -60,3 +60,28 @@ class Review(TimeStampedAbstractModel):
 
     def __str__(self):
         return f"{self.user} - {self.book} ({self.score})"
+
+
+class Notifications(models.Model):
+    user = models.ForeignKey('Profile', on_delete=models.SET_NULL, null=True, related_name="notifications",
+                             verbose_name="کاربر")
+    book = models.ForeignKey('Book', on_delete=models.SET_NULL, null=True, related_name="notifications",
+                             verbose_name="کتاب")
+    title = models.CharField(max_length=255, verbose_name="عنوان اطلاع‌رسانی")
+    description = models.TextField(verbose_name="توضیحات")
+    image = models.ImageField(upload_to='uploads/', verbose_name="تصویر اطلاع‌رسانی")
+
+    TYPE_CHOICES = [
+        ('sms', 'Need to send SMS'),
+        ('no_sms', "Don't need to send SMS"),
+    ]
+    type = models.CharField(max_length=7, choices=TYPE_CHOICES, default='no_sms', verbose_name="نوع اطلاع‌رسانی")
+
+    class Meta:
+        verbose_name = "اطلاع‌رسانی"
+        verbose_name_plural = "اطلاع‌رسانی‌ها"
+
+    def __str__(self):
+        return self.title
+
+
