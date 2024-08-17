@@ -41,7 +41,7 @@ class Book(TimeStampedAbstractModel, models.Model):
 
 
 class Review(TimeStampedAbstractModel, models.Model):
-    user = models.ForeignKey('Profile', on_delete=models.SET_NULL, null=True, related_name="reviews",
+    user = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, related_name="reviews",
                              verbose_name="کاربر")
     book = models.ForeignKey('Book', on_delete=models.SET_NULL, null=True, related_name="reviews", verbose_name="کتاب")
     score = models.IntegerField(verbose_name="امتیاز")
@@ -63,7 +63,7 @@ class Review(TimeStampedAbstractModel, models.Model):
 
 
 class Notification(TimeStampedAbstractModel, models.Model):
-    user = models.ForeignKey('Profile', on_delete=models.SET_NULL, null=True, related_name="notifications",
+    user = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, related_name="notifications",
                              verbose_name="کاربر")
     book = models.ForeignKey('Book', on_delete=models.SET_NULL, null=True, related_name="notifications",
                              verbose_name="کتاب")
@@ -86,7 +86,7 @@ class Notification(TimeStampedAbstractModel, models.Model):
 
 
 class BaseRequestModel(TimeStampedAbstractModel, models.Model):
-    user = models.ForeignKey('Profile', on_delete=models.CASCADE, verbose_name="کاربر")
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE, verbose_name="کاربر")
     book = models.ForeignKey('Book', on_delete=models.CASCADE, verbose_name="کتاب")
 
     STATUS_CHOICES = [
@@ -96,9 +96,6 @@ class BaseRequestModel(TimeStampedAbstractModel, models.Model):
     ]
     status = models.CharField(max_length=8, choices=STATUS_CHOICES, default='pending', verbose_name="وضعیت")
     duration = models.IntegerField(verbose_name="مدت زمان (روز)")
-
-    class Meta:
-        abstract = True
 
 
 class BorrowRequest(BaseRequestModel, models.Model):
@@ -127,19 +124,13 @@ class ExtensionRequest(BaseRequestModel, models.Model):
 
 
 class ReviewRequest(BaseRequestModel, models.Model):
-    STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('accepted', 'Accepted'),
-    ]
-    status = models.CharField(max_length=8, choices=STATUS_CHOICES, default='pending', verbose_name="وضعیت")
-
     class Meta:
         verbose_name = "درخواست بررسی"
         verbose_name_plural = "درخواست‌های بررسی"
 
 
 class History(TimeStampedAbstractModel, models.Model):
-    user = models.ForeignKey('Profile', on_delete=models.CASCADE, verbose_name="کاربر")
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE, verbose_name="کاربر")
     book = models.ForeignKey('Book', on_delete=models.CASCADE, verbose_name="کتاب")
     request = models.ForeignKey('BaseRequestModel', on_delete=models.CASCADE, null=True, blank=True,
                                 verbose_name="درخواست")
