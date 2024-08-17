@@ -62,7 +62,7 @@ class Review(TimeStampedAbstractModel):
         return f"{self.user} - {self.book} ({self.score})"
 
 
-class Notifications(models.Model):
+class Notification(models.Model):
     user = models.ForeignKey('Profile', on_delete=models.SET_NULL, null=True, related_name="notifications",
                              verbose_name="کاربر")
     book = models.ForeignKey('Book', on_delete=models.SET_NULL, null=True, related_name="notifications",
