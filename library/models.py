@@ -20,6 +20,7 @@ class Category(models.Model):
 
 class Book(BaseModel, models.Model):
     title = models.CharField(max_length=255, verbose_name="عنوان کتاب")
+    image = models.ImageField(upload_to='uploads/', verbose_name='عکس')
     author = models.CharField(max_length=255, verbose_name="نویسنده")
     translator = models.CharField(max_length=255, blank=True, null=True, verbose_name="مترجم")
     publisher = models.CharField(max_length=255, verbose_name="انتشارات")

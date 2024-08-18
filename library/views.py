@@ -1,6 +1,8 @@
-from rest_framework import generics
-from django.db.models import Count
-from .models import Book, Category, ReviewRequest
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
+
+from .models import Book, Category
 from library.serializers.main_page_serializers import BookSerializer
 from library.serializers.category_serializers import CategorySerializer
 from rest_framework.viewsets import ModelViewSet
@@ -19,18 +21,19 @@ class CategoryViewSet(ModelViewSet):
         return queryset.prefetch_related('children')
 
 
-class NewestBooksView(generics.ListAPIView):
-    queryset = Book.objects.all().order_by('created_at')[:10]
-    serializer_class = BookSerializer
+class MainPageAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        newest_books = Book.objects.order_by('created_at')[:10]
+        newest_books_data = BookSerializer(newest_books, many=True).data
 
+        most_popular_books = Book.objects.order_by()
+        most_popular_books_data = BookSerializer(most_popular_books, many=True).data
 
-class MostPopularBooksView(generics.ListAPIView):
-    queryset = Book.objects.all().order_by('reviews__score')[:10]
-    serializer_class = BookSerializer
+        most_reviewed_books = Book.objects.order_by()
+        most_reviewed_books_data = BookSerializer(most_reviewed_books, many=True).data
 
+        data = {
+            'newest_books': newest_books_data
+        }
 
-class MostReviewedBooksView(generics.ListAPIView):
-    serializer_class = BookSerializer
-
-    def get_queryset(self):
-        return Book.objects.annotate(review_count=Count('reviews')).order_by('-review_count')[:10]
+        return Response(data, status=status.HTTP_200_OK)
