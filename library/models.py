@@ -1,5 +1,5 @@
 from django.db import models
-from core.models import TimeStampedAbstractModel
+from core.models import BaseModel
 from core.models import Profile
 
 
@@ -18,17 +18,18 @@ class Category(models.Model):
         return self.title
 
 
-class Book(TimeStampedAbstractModel, models.Model):
+class Book(BaseModel, models.Model):
     title = models.CharField(max_length=255, verbose_name="عنوان کتاب")
     author = models.CharField(max_length=255, verbose_name="نویسنده")
     translator = models.CharField(max_length=255, blank=True, null=True, verbose_name="مترجم")
     publisher = models.CharField(max_length=255, verbose_name="انتشارات")
-    volume_number = models.IntegerField(verbose_name="شماره جلد")
-    publication_year = models.IntegerField(verbose_name="سال انتشار")  # Changed field name to be more descriptive
-    page_count = models.IntegerField(verbose_name="تعداد صفحه")
+    volume_number = models.PositiveIntegerField(verbose_name="شماره جلد")
+    publication_year = models.PositiveIntegerField(
+        verbose_name="سال انتشار")  # Changed field name to be more descriptive
+    page_count = models.PositiveIntegerField(verbose_name="تعداد صفحه")
     owner = models.CharField(max_length=255, verbose_name="صاحب کتاب")
     description = models.TextField(verbose_name="توضیحات")
-    count = models.IntegerField(verbose_name="تعداد موجودی")
+    count = models.PositiveIntegerField(verbose_name="تعداد موجودی")
     category = models.ForeignKey('Category', on_delete=models.SET_NULL, null=True, related_name="books",
                                  verbose_name="دسته‌بندی")
 
@@ -40,7 +41,7 @@ class Book(TimeStampedAbstractModel, models.Model):
         return self.title
 
 
-class Review(TimeStampedAbstractModel, models.Model):
+class Review(BaseModel, models.Model):
     user = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, related_name="reviews",
                              verbose_name="کاربر")
     book = models.ForeignKey('Book', on_delete=models.SET_NULL, null=True, related_name="reviews", verbose_name="کتاب")
@@ -62,7 +63,7 @@ class Review(TimeStampedAbstractModel, models.Model):
         return f"{self.user} - {self.book} ({self.score})"
 
 
-class Notification(TimeStampedAbstractModel, models.Model):
+class Notification(BaseModel, models.Model):
     user = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, related_name="notifications",
                              verbose_name="کاربر")
     book = models.ForeignKey('Book', on_delete=models.SET_NULL, null=True, related_name="notifications",
@@ -85,7 +86,7 @@ class Notification(TimeStampedAbstractModel, models.Model):
         return self.title
 
 
-class BaseRequestModel(TimeStampedAbstractModel, models.Model):
+class BaseRequestModel(BaseModel):
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, verbose_name="کاربر")
     book = models.ForeignKey('Book', on_delete=models.CASCADE, verbose_name="کتاب")
 
@@ -98,7 +99,7 @@ class BaseRequestModel(TimeStampedAbstractModel, models.Model):
     duration = models.IntegerField(verbose_name="مدت زمان (روز)")
 
 
-class BorrowRequest(BaseRequestModel, models.Model):
+class BorrowRequest(BaseRequestModel):
     TIME_CHOICES = [
         (14, '14 Days'),
         (30, '30 Days'),
@@ -110,7 +111,7 @@ class BorrowRequest(BaseRequestModel, models.Model):
         verbose_name_plural = "درخواست‌های امانت"
 
 
-class ExtensionRequest(BaseRequestModel, models.Model):
+class ExtensionRequest(BaseRequestModel):
     TIME_CHOICES = [
         (3, '3 Days'),
         (5, '5 Days'),
@@ -123,16 +124,18 @@ class ExtensionRequest(BaseRequestModel, models.Model):
         verbose_name_plural = "درخواست‌های تمدید"
 
 
-class ReviewRequest(BaseRequestModel, models.Model):
+class ReviewRequest(BaseRequestModel):
+    text = models.TextField(max_length=1000, null=True)
+
     class Meta:
         verbose_name = "درخواست بررسی"
         verbose_name_plural = "درخواست‌های بررسی"
 
 
-class History(TimeStampedAbstractModel, models.Model):
-    user = models.ForeignKey(Profile, on_delete=models.CASCADE, verbose_name="کاربر")
-    book = models.ForeignKey('Book', on_delete=models.CASCADE, verbose_name="کتاب")
-    request = models.ForeignKey('BaseRequestModel', on_delete=models.CASCADE, null=True, blank=True,
+class History(BaseModel, models.Model):
+    user = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, verbose_name="کاربر")
+    book = models.ForeignKey('Book', on_delete=models.SET_NULL, null=True, verbose_name="کتاب")
+    request = models.ForeignKey('BaseRequestModel', on_delete=models.SET_NULL, null=True, blank=True,
                                 verbose_name="درخواست")
 
     class Meta:
