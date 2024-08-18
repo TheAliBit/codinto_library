@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 from decouple import config
 from .jwt_settings import SIMPLE_JWT
+from .rest_framework_settings import REST_FRAMEWORK as RF_SETTINGS
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,23 +39,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_filters',
 
     # third party
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
 
+
     # local apps
     'core',
     'library',
 ]
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-    # other REST framework settings...
-}
+REST_FRAMEWORK = RF_SETTINGS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
