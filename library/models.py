@@ -89,7 +89,7 @@ class Notification(BaseModel, models.Model):
 
 class BaseRequestModel(BaseModel):
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, verbose_name="کاربر")
-    book = models.ForeignKey('Book', on_delete=models.CASCADE, verbose_name="کتاب")
+    book = models.ForeignKey('Book', on_delete=models.CASCADE, verbose_name="کتاب", related_name='requests')
 
     STATUS_CHOICES = [
         ('rejected', 'Rejected'),
