@@ -1,7 +1,22 @@
 from rest_framework import generics
 from django.db.models import Count
-from .models import Book
+from .models import Book, Category, ReviewRequest
 from library.serializers.main_page_serializers import BookSerializer
+from library.serializers.category_serializers import CategorySerializer
+from rest_framework.viewsets import ModelViewSet
+
+
+class CategoryViewSet(ModelViewSet):
+    queryset = Category.objects.order_by('id')
+    serializer_class = CategorySerializer
+    filterset_fields = ['parent']
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        parent_param = self.request.query_params.get('parent', None)
+        if parent_param is None:
+            queryset = queryset.filter(parent__isnull=True)
+        return queryset.prefetch_related('children')
 
 
 class NewestBooksView(generics.ListAPIView):
