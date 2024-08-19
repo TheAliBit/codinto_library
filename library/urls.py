@@ -8,4 +8,5 @@ router = DefaultRouter()
 urlpatterns = [
                   path('category/', CategoryViewSet.as_view({'get': 'list', 'post': 'create'}), name='category-list'),
                   path('main-page/', MainPageAPIView.as_view(), name='newest-books'),
+                  # path('search/', )
               ] + router.urls
