@@ -7,9 +7,7 @@ from core.models import Profile
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['username', 'password', 'first_name', 'last_name', 'phone_number', 'email', 'telegram_id', 'picture']
-        extra_kwargs = {'password': {'write_only': True},
-                        'username': {'read_only': True}}
+        fields = ['username', 'first_name', 'last_name', 'phone_number', 'email', 'telegram_id', 'picture']
 
     def to_representation(self, instance):
         result = super().to_representation(instance)

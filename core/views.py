@@ -1,10 +1,11 @@
 from rest_framework import generics, status
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.db import transaction
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from .utils import black_list_refresh_token, get_access_from_refresh
 from core.serializers.registration_serializers import LoginSerializer, RefreshSerializer
 from core.serializers.profile_serializers import ProfileSerializer
@@ -12,6 +13,7 @@ from rest_framework import status, mixins, generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
+from core.models import Profile
 
 
 # Create your views here.
@@ -58,36 +60,6 @@ class RefreshAPIView(generics.CreateAPIView):
         return Response(data={'access': access}, status=status.HTTP_200_OK)
 
 
-# class ProfileAPIView(APIView):
-#     permission_classes = [IsAuthenticated]
-#
-#     def get(self, request):
-#         user = request.user
-#         serializer = ProfileSerializer(user)
-#         default_content = serializer.data
-#         default_content['password'] = ''
-#         return Response({
-#             "Hint": ".دیکشنری زیر را کپی و در قسمت پست بزارید و موارد را تغییر دهید",
-#             "current_profile": default_content
-#         })
-#
-#     def put(self, request):
-#         password = request.data.get('password')
-#         if not password:
-#             return Response({"message": "!پسورد را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
-#
-#         user = authenticate(username=request.user.username, password=password)
-#         if user is None:
-#             return Response({"message": "!پسورد اشتباه است"}, status=status.HTTP_400_BAD_REQUEST)
-#
-#         user = request.user
-#         serializer = ProfileSerializer(user, data=request.data, partial=True)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 class ProfileUpdateView(mixins.RetrieveModelMixin,
                         mixins.UpdateModelMixin,
                         generics.GenericAPIView):
@@ -95,23 +67,18 @@ class ProfileUpdateView(mixins.RetrieveModelMixin,
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
+        # Return the user object itself
         return self.request.user
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
-        password = request.data.get('password')
-        if not password:
-            return Response({"error": "!رمزعبور را وارد کنید"}, status=status.HTTP_400_BAD_REQUEST)
-
-        user = authenticate(username=request.user.username, password=password)
-        if user is None:
-            return Response({"error": "!رمزعبور اشتباه است"}, status=status.HTTP_400_BAD_REQUEST)
-
+        new_username = request.data.get('username')
+        if new_username:
+            if Profile.objects.filter(username=new_username).exists():
+                raise ValidationError({'error': "!نام کاربری باید یکتا باشد"})
         return self.update(request, *args, **kwargs)
 
     def perform_update(self, serializer):
-        # Exclude username and password from the update
-        data = {k: v for k, v in serializer.validated_data.items() if k not in ['user', 'password']}
-        serializer.save(**data)
+        serializer.save()
