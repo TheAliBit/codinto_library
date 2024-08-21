@@ -1,17 +1,17 @@
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
-from rest_framework import generics
+from rest_framework import status, mixins, generics
+from rest_framework.viewsets import ModelViewSet
+from rest_framework import viewsets
 
 from .models import Book, Category, BorrowRequest
 from library.serializers.main_page_serializers import BookSerializer
 from library.serializers.category_serializers import CategorySerializer
 from core.serializers.profile_serializers import ProfileSerializer
-from rest_framework.viewsets import ModelViewSet
-from core.models import Profile
+from library.serializers.book_serializers import FullBookSerializer
 
-from django.db.models import Count, Q, Subquery, OuterRef
+from django.db.models import Count, Q
 
 
 class CategoryViewSet(ModelViewSet):
@@ -25,6 +25,11 @@ class CategoryViewSet(ModelViewSet):
         if parent_param is None:
             queryset = queryset.filter(parent__isnull=True)
         return queryset.prefetch_related('children')
+
+
+class BookViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Book.objects.order_by('id')
+    serializer_class = BookSerializer
 
 
 # class MainPageAPIView(APIView):
