@@ -2,7 +2,6 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from core.views import LoginAPIView, LogoutAPIView, RefreshAPIView, ProfileUpdateView
-from library.views import BookView
 
 router = DefaultRouter()
 
