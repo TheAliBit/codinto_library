@@ -1,13 +1,25 @@
-from rest_framework.filters import BaseFilterBackend
+from random import choices
+
+from django_filters import rest_framework as filters
+from library.models import Book
 
 
-class CustomFilterBackend(BaseFilterBackend):
-    def filter_queryset(self, request, queryset, view):
-        filter_type = request.query_params.get('filter', None)
-        if filter_type == 'تازه ترین ها':
-            queryset = queryset.order_by('-created_at')[:10]
-        elif filter_type == 'پرطرفدار ها':
-            queryset = queryset.order_by('-created_at')[:10]
-        elif filter_type == 'محبوب ترین ها':
-            queryset = queryset.order_by('-created_at')[:10]
+class CustomBookFilterSet(filters.FilterSet):
+    filter_type = filters.ChoiceFilter(
+        method='filter_by_type',
+        choices=[('latest', 'تازه ترین ها'), ('popular', 'پرطرفدار ها'), ('most_popular', 'محبوب ترین ها')],
+        label='مرتب سازی')
+
+    class Meta:
+        model = Book
+        fields = ['category', 'filter_type']
+
+    @staticmethod
+    def filter_by_type(self, queryset, name, value):
+        if value == 'تازه ترین ها':
+            return queryset.order_by('-created_at')[:10]
+        elif value == 'پرطرفدار ها':
+            return queryset.order_by('-created_at')[:10]
+        elif value == 'محبوب ترین ها':
+            return queryset.order_by('-created_at')[:10]
         return queryset
