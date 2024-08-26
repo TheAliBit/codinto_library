@@ -1,14 +1,16 @@
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import generics
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import viewsets
 
 from .models import Book, Category
-from library.serializers.main_page_serializers import BookSerializer
+from library.serializers.home_page_serializers import BookSerializer
 from library.serializers.category_serializers import CategorySerializer
-from core.serializers.profile_serializers import ProfileSerializer
+from library.serializers.book_serializers import FullBookSerializer
 
 from django.db.models import Count, Q
 
@@ -56,11 +58,9 @@ class HomePageAPIView(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
-class SearchPageAPIView(APIView):
+class SearchListAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
-
-    @staticmethod
-    def get(request):
-        user = request.user
-        serializer = ProfileSerializer(user)
-        return Response(serializer.data)
+    queryset = Book.objects.all()
+    serializer_class = FullBookSerializer
+    filterset_fields = ['category']
+    search_fields = ['title']
