@@ -49,39 +49,25 @@ class BookViewSet(viewsets.ReadOnlyModelViewSet):
 #
 #         return Response(data, status=status.HTTP_200_OK)
 
-class MainPageAPIView(APIView):
+class HomePageAPIView(APIView):
     def get(self, request, *args, **kwargs):
-        # Get newest books (ordered by creation date)
         newest_books = Book.objects.order_by('-created_at')[:10]
         newest_books_data = BookSerializer(newest_books, many=True).data
 
-        # Get most popular books (ordered by number of borrow requests, extension requests, and review requests)
-        # sub_query = Subquery(
-        #     BorrowRequest.objects.filter(book=OuterRef('id'))
-        # )
         most_popular_books = Book.objects.annotate(
             borrow_requests_count=Count('requests', filter=Q(requests__borrowrequest__isnull=False)),
-            # extension_requests_count=Count('ExtensionRequest'),
-            # review_requests_count=Count('ReviewRequest')
-        ).order_by(
-            '-borrow_requests_count',
-            # '-extension_requests_count',
-            # '-review_requests_count'
-        )[:10]  # Limit to top 10 most popular books
+        ).order_by('-borrow_requests_count', )[:10]
         most_popular_books_data = BookSerializer(most_popular_books, many=True).data
 
-        # Get most reviewed books (ordered by number of review requests)
-        # most_reviewed_books = Book.objects.annotate(
-        #     review_requests_count=Count('ReviewRequest')
-        # ).order_by(
-        #     '-review_requests_count'
-        # )[:10]  # Limit to top 10 most reviewed books
-        # most_reviewed_books_data = BookSerializer(most_reviewed_books, many=True).data
+        most_reviewed_books = Book.objects.annotate(
+            review_requests_count=Count('requests', filter=Q(requests__reviewrequest__isnull=False)),
+        ).order_by('-review_requests_count')[:10]
+        most_reviewed_books_data = BookSerializer(most_reviewed_books, many=True).data
 
         data = {
-            'newest_books': newest_books_data,
-            'most_popular_books': most_popular_books_data,
-            # 'most_reviewed_books': most_reviewed_books_data,
+            'تازه ترین ها': newest_books_data,
+            'پرطرفدار ها': most_popular_books_data,
+            'محبوب ترین ها': most_reviewed_books_data,
         }
 
         return Response(data, status=status.HTTP_200_OK)
