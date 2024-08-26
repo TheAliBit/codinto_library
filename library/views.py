@@ -45,7 +45,6 @@ class HomePageAPIView(APIView):
             borrow_requests_count=Count('requests', filter=Q(requests__borrowrequest__isnull=False)),
         ).order_by('-borrow_requests_count', )[:10]
         most_popular_books_data = BookSerializer(most_popular_books, many=True).data
-
         most_reviewed_books = Book.objects.annotate(
             review_requests_count=Count('requests', filter=Q(requests__reviewrequest__isnull=False)),
         ).order_by('-review_requests_count')[:10]
