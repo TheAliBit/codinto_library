@@ -1,15 +1,14 @@
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status, mixins, generics
+from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import viewsets
 
-from .models import Book, Category, BorrowRequest
+from .models import Book, Category
 from library.serializers.main_page_serializers import BookSerializer
 from library.serializers.category_serializers import CategorySerializer
 from core.serializers.profile_serializers import ProfileSerializer
-from library.serializers.book_serializers import FullBookSerializer
 
 from django.db.models import Count, Q
 
@@ -32,25 +31,9 @@ class BookViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = BookSerializer
 
 
-# class MainPageAPIView(APIView):
-#     def get(self, request, *args, **kwargs):
-#         newest_books = Book.objects.order_by('created_at')[:10]
-#         newest_books_data = BookSerializer(newest_books, many=True).data
-#
-#         most_popular_books = Book.objects.order_by()
-#         most_popular_books_data = BookSerializer(most_popular_books, many=True).data
-#
-#         most_reviewed_books = Book.objects.order_by()
-#         most_reviewed_books_data = BookSerializer(most_reviewed_books, many=True).data
-#
-#         data = {
-#             'newest_books': newest_books_data
-#         }
-#
-#         return Response(data, status=status.HTTP_200_OK)
-
 class HomePageAPIView(APIView):
-    def get(self, request, *args, **kwargs):
+    @staticmethod
+    def get(request, *args, **kwargs):
         newest_books = Book.objects.order_by('-created_at')[:10]
         newest_books_data = BookSerializer(newest_books, many=True).data
 
@@ -76,7 +59,8 @@ class HomePageAPIView(APIView):
 class SearchPageAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
+    @staticmethod
+    def get(request):
         user = request.user
         serializer = ProfileSerializer(user)
         return Response(serializer.data)
