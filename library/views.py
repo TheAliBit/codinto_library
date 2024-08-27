@@ -1,3 +1,4 @@
+from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -9,7 +10,7 @@ from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Book, Category
-from library.serializers.home_page_serializers import BookSerializer
+from library.serializers.home_page_serializers import BookSerializer, BookDetailSerializer
 from library.serializers.category_serializers import CategorySerializer
 from library.serializers.book_serializers import FullBookSerializer
 from library.filters import CustomBookFilterSet
@@ -32,7 +33,18 @@ class CategoryViewSet(ModelViewSet):
 
 class BookViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Book.objects.order_by('id')
-    serializer_class = BookSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return BookSerializer
+        else:
+            return BookDetailSerializer
+
+    @action(detail=True, methods=['get'])
+    def get_review(self, request):
+        book = self.get_object()
+        serializer = self.get_serializer(book)
+        return Response(serializer.data)
 
 
 class HomePageAPIView(APIView):
