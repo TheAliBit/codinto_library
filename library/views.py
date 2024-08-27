@@ -1,5 +1,7 @@
-from rest_framework.decorators import action
+from django.shortcuts import get_object_or_404
 from rest_framework.filters import SearchFilter
+from rest_framework.generics import GenericAPIView
+from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -8,14 +10,17 @@ from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import rest_framework as filters
 
-from .models import Book, Category
-from library.serializers.home_page_serializers import BookSerializer, BookDetailSerializer
+from .models import Book, Category, Review
+from library.serializers.home_page_serializers import BookSerializer, BookDetailSerializer, ReviewSerializer
 from library.serializers.category_serializers import CategorySerializer
 from library.serializers.book_serializers import FullBookSerializer
-from library.filters import CustomBookFilterSet
+from library.filters import CustomBookFilterSet, CustomReviewFilterSet
 
 from django.db.models import Count, Q
+
+from .serializers.review_serializers import ReviewSerializer_
 
 
 class CategoryViewSet(ModelViewSet):
@@ -39,12 +44,6 @@ class BookViewSet(viewsets.ReadOnlyModelViewSet):
             return BookSerializer
         else:
             return BookDetailSerializer
-
-    @action(detail=True, methods=['get'])
-    def get_review(self, request):
-        book = self.get_object()
-        serializer = self.get_serializer(book)
-        return Response(serializer.data)
 
 
 class HomePageAPIView(APIView):
@@ -79,3 +78,19 @@ class SearchListAPIView(generics.ListAPIView):
     filterset_class = CustomBookFilterSet
     filterset_fields = ['category']
     search_fields = ['title']
+
+
+class BorrowRequestAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        book = get_object_or_404(Book, pk=pk)
+
+
+class UserReviewListView(generics.ListAPIView):
+    serializer_class = ReviewSerializer_
+    filterset_class = CustomReviewFilterSet
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = Review.objects.filter(user=user, state="accepted")
+        return queryset.order_by('-created_at')

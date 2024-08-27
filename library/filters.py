@@ -1,6 +1,6 @@
 from django.db.models import Q, Count
 from django_filters import rest_framework as filters
-from library.models import Book
+from library.models import Book, Review
 
 
 class CustomBookFilterSet(filters.FilterSet):
@@ -26,3 +26,12 @@ class CustomBookFilterSet(filters.FilterSet):
                 review_requests_count=Count('requests', filter=Q(requests__reviewrequest__isnull=False)),
             ).order_by('-review_requests_count')[:10]
         return queryset
+
+
+class CustomReviewFilterSet(filters.FilterSet):
+    start_date = filters.DateFilter(field_name='created_at', lookup_expr='gte')
+    end_date = filters.DateFilter(field_name='created_at', lookup_expr='lte')
+
+    class Meta:
+        model = Review
+        fields = ['start_date', 'end_date']
