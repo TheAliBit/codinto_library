@@ -1,7 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.filters import SearchFilter
-from rest_framework.generics import GenericAPIView, DestroyAPIView, UpdateAPIView
-from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
+from rest_framework.generics import DestroyAPIView, UpdateAPIView, RetrieveAPIView, GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -38,12 +37,12 @@ class CategoryViewSet(ModelViewSet):
 
 class BookViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Book.objects.order_by('id')
+    serializer_class = BookSerializer
 
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return BookSerializer
-        else:
-            return BookDetailSerializer
+
+class DetailedBookView(RetrieveAPIView):
+    queryset = Book.objects.all()
+    serializer_class = FullBookSerializer
 
 
 class HomePageAPIView(APIView):
@@ -80,12 +79,6 @@ class SearchListAPIView(generics.ListAPIView):
     search_fields = ['title']
 
 
-class BorrowRequestAPIView(APIView):
-    def post(self, request, *args, **kwargs):
-        pk = kwargs.get('pk')
-        book = get_object_or_404(Book, pk=pk)
-
-
 class UserReviewListView(generics.ListAPIView):
     serializer_class = DetailedReviewSerializer
     filterset_class = CustomReviewFilterSet
@@ -103,9 +96,6 @@ class UserReveiwDetailView(generics.RetrieveAPIView, DestroyAPIView, UpdateAPIVi
         user = self.request.user
         return Review.objects.filter(user=user)
 
-
-
-
-
-
+# class BorrowRequestAPIView(APIView):
+#     serializers_class =
 

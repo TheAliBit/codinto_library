@@ -2,10 +2,10 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from library.views import CategoryViewSet, HomePageAPIView, BookViewSet, SearchListAPIView, UserReviewListView, \
-    UserReveiwDetailView
+    UserReveiwDetailView, DetailedBookView
 
 router = DefaultRouter()
-router.register('book-list', BookViewSet, basename='book-list')
+# router.register('book-list', BookViewSet, basename='book-list')
 
 urlpatterns = [
                   path('home/', HomePageAPIView.as_view(), name='صفحه اصلی سامانه'),
@@ -13,5 +13,7 @@ urlpatterns = [
                   path('category/', CategoryViewSet.as_view({'get': 'list', 'post': 'create'}), name='category-list'),
                   path('reviews/', UserReviewListView.as_view(), name='review-detail'),
                   path('reviews/<int:pk>/', UserReveiwDetailView.as_view(), name='review-detail'),
-                  # path('book-list/borrow/', BorrowRequest)
+                  path('book-list/', BookViewSet.as_view({'get': 'list'}), name='book-list'),
+                  path('book-list/<int:pk>/', DetailedBookView.as_view(), name='book-detail'),
+
               ] + router.urls
