@@ -15,6 +15,6 @@ urlpatterns = [
                   path('reviews/<int:pk>/', UserReveiwDetailView.as_view(), name='review-detail'),
                   path('book-list/', BookViewSet.as_view({'get': 'list'}), name='book-list'),
                   path('book-list/<int:pk>/', DetailedBookView.as_view(), name='book-detail'),
-                    path('requests/', RequestsListView.as_view(), name='request-list'),
+                  path('requests/', RequestsListView.as_view(), name='request-list'),
 
               ] + router.urls
