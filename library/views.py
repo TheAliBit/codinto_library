@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.filters import SearchFilter
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, DestroyAPIView
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -20,7 +20,7 @@ from library.filters import CustomBookFilterSet, CustomReviewFilterSet
 
 from django.db.models import Count, Q
 
-from .serializers.review_serializers import ReviewSerializer_
+from .serializers.review_serializers import DetailedReviewSerializer, DetailedReviewSerializer
 
 
 class CategoryViewSet(ModelViewSet):
@@ -87,7 +87,7 @@ class BorrowRequestAPIView(APIView):
 
 
 class UserReviewListView(generics.ListAPIView):
-    serializer_class = ReviewSerializer_
+    serializer_class = DetailedReviewSerializer
     filterset_class = CustomReviewFilterSet
 
     def get_queryset(self):
@@ -95,8 +95,14 @@ class UserReviewListView(generics.ListAPIView):
         queryset = Review.objects.filter(user=user)
         return queryset.order_by('-created_at')
 
-class UserReveiwDetailView(generics.RetrieveAPIView):
-    serializer_class = ReviewSerializer_
+
+class UserReveiwDetailView(generics.RetrieveAPIView, DestroyAPIView):
+    serializer_class = DetailedReviewSerializer
+
     def get_queryset(self):
         user = self.request.user
         return Review.objects.filter(user=user)
+
+
+
+
