@@ -101,7 +101,7 @@ class UserReveiwDetailView(generics.RetrieveAPIView, DestroyAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return Review.objects.filter(user=user)
+        # return Review.objects.filter(user=user)
 
 
 
