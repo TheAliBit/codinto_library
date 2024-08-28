@@ -94,3 +94,9 @@ class UserReviewListView(generics.ListAPIView):
         user = self.request.user
         queryset = Review.objects.filter(user=user)
         return queryset.order_by('-created_at')
+
+class UserReveiwDetailView(generics.RetrieveAPIView):
+    serializer_class = ReviewSerializer_
+    def get_queryset(self):
+        user = self.request.user
+        return Review.objects.filter(user=user)
