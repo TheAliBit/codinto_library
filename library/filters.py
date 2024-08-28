@@ -29,8 +29,8 @@ class CustomBookFilterSet(filters.FilterSet):
 
 
 class CustomReviewFilterSet(filters.FilterSet):
-    start_date = filters.DateFilter(field_name='created_at', lookup_expr='gte')
-    end_date = filters.DateFilter(field_name='created_at', lookup_expr='lte')
+    start_date = filters.DateFilter(field_name='created_at', lookup_expr='gte', label='زمان شروع')
+    end_date = filters.DateFilter(field_name='created_at', lookup_expr='lte', label='زمان پایان')
 
     class Meta:
         model = Review

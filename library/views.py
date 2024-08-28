@@ -92,5 +92,5 @@ class UserReviewListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        queryset = Review.objects.filter(user=user, state="accepted")
+        queryset = Review.objects.filter(user=user)
         return queryset.order_by('-created_at')
