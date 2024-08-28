@@ -1,6 +1,7 @@
-from django.shortcuts import get_object_or_404
+from itertools import chain
+
 from rest_framework.filters import SearchFilter
-from rest_framework.generics import DestroyAPIView, UpdateAPIView, RetrieveAPIView, GenericAPIView
+from rest_framework.generics import DestroyAPIView, UpdateAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,17 +10,17 @@ from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
-from django_filters import rest_framework as filters
 
-from .models import Book, Category, Review
-from library.serializers.home_page_serializers import BookSerializer, BookDetailSerializer, ReviewSerializer
+from .models import Book, Category, Review, BorrowRequest, ExtensionRequest
+from library.serializers.home_page_serializers import BookSerializer
 from library.serializers.category_serializers import CategorySerializer
 from library.serializers.book_serializers import FullBookSerializer
 from library.filters import CustomBookFilterSet, CustomReviewFilterSet
 
 from django.db.models import Count, Q
 
-from .serializers.review_serializers import DetailedReviewSerializer, DetailedReviewSerializer
+from .serializers.Request_serializers import UserRequestSerializer
+from .serializers.review_serializers import DetailedReviewSerializer
 
 
 class CategoryViewSet(ModelViewSet):
@@ -96,6 +97,15 @@ class UserReveiwDetailView(generics.RetrieveAPIView, DestroyAPIView, UpdateAPIVi
         user = self.request.user
         return Review.objects.filter(user=user)
 
-# class BorrowRequestAPIView(APIView):
-#     serializers_class =
 
+class RequestsListView(generics.ListAPIView):
+    serializer_class = UserRequestSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        borrow_requests = BorrowRequest.objects.filter(user=user)
+        extension_requests = ExtensionRequest.objects.filter(user=user)
+        review_requests = Review.objects.filter(user=user)
+        combined_queryset = list(chain(borrow_requests, extension_requests, review_requests))
+        combined_queryset.sort(key=lambda x: x.created_at, reverse=True)
+        return combined_queryset
