@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.filters import SearchFilter
-from rest_framework.generics import GenericAPIView, DestroyAPIView
+from rest_framework.generics import GenericAPIView, DestroyAPIView, UpdateAPIView
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -96,12 +96,15 @@ class UserReviewListView(generics.ListAPIView):
         return queryset.order_by('-created_at')
 
 
-class UserReveiwDetailView(generics.RetrieveAPIView, DestroyAPIView):
+class UserReveiwDetailView(generics.RetrieveAPIView, DestroyAPIView, UpdateAPIView):
     serializer_class = DetailedReviewSerializer
 
     def get_queryset(self):
         user = self.request.user
         return Review.objects.filter(user=user)
+
+
+
 
 
 
