@@ -72,9 +72,14 @@ class UserBorrowRequestSerializer_(serializers.ModelSerializer):
         fields = [
             'id', 'time', 'status'
         ]
+
         read_only_fields = ['status']
 
-    def update(self, instance, validated_data):
-        if 'time' in validated_data:
-            validated_data['status'] = 'pending'
-        return super().update(instance, validated_data)
+    def validate(self, data):
+        user = self.context['request'].user
+        book = self.context['view'].kwargs.get('pk')
+
+
+        if BorrowRequest.objects.filter(user=user, book_id=book, status='pending').exists():
+            raise serializers.ValidationError("!شما یک درخواست درحال بررسی دارید")
+        return data
