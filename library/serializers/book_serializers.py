@@ -11,3 +11,13 @@ class FullBookSerializer(serializers.ModelSerializer):
             'id', 'title', 'image', 'author', 'translator', 'publisher', 'volume_number', 'publication_year',
             'page_count', 'owner', 'description', 'count', 'category'
         ]
+
+
+class SimpleBookSerializer(serializers.ModelSerializer):
+    book_id = serializers.CharField(source='book.id', read_only=True)
+
+    class Meta:
+        model = Book
+        fields = [
+            'book_id', 'title', 'image'
+        ]
