@@ -97,7 +97,7 @@ class BaseRequestModel(BaseModel):
         ('accepted', 'Accepted'),
     ]
     status = models.CharField(max_length=8, choices=STATUS_CHOICES, default='pending', verbose_name="وضعیت")
-    duration = models.IntegerField(null=True, verbose_name="مدت زمان (روز)")
+    duration = models.IntegerField(null=True, blank=True, verbose_name="مدت زمان (روز)")
 
     def __str__(self):
         return self.user.username

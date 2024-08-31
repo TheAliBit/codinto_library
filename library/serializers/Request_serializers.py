@@ -9,32 +9,20 @@ class BookDetailForBorrowRequestSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'image']
 
 
-class UserBorrowRequestSerializer(serializers.ModelSerializer):
-    book = BookDetailForBorrowRequestSerializer()
-    request_type = serializers.SerializerMethodField()
-
+class BorrowRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = BorrowRequest
         fields = [
-            'request_type', 'id', 'created_at', 'duration', 'status', 'book'
+            'id', 'duration', 'status'
         ]
 
-    def get_request_type(self, obj):
-        return 'BorrowRequest'
 
-
-class UserExtensionRequestSerializer(serializers.ModelSerializer):
-    book = BookDetailForBorrowRequestSerializer()
-    request_type = serializers.SerializerMethodField()
-
+class ExtensionRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExtensionRequest
         fields = [
-            'request_type', 'id', 'created_at', 'duration', 'status', 'book'
+            'id', 'duration', 'status'
         ]
-
-    def get_request_type(self, obj):
-        return 'ExtensionRequest'
 
 
 class ReviewRequestSerializer(serializers.ModelSerializer):
@@ -57,9 +45,9 @@ class UserRequestSerializer(serializers.Serializer):
 
     def get_request(self, obj):
         if isinstance(obj, BorrowRequest):
-            return UserBorrowRequestSerializer(obj).data
+            return BorrowRequestSerializer(obj).data
         elif isinstance(obj, ExtensionRequest):
-            return UserExtensionRequestSerializer(obj).data
+            return ExtensionRequestSerializer(obj).data
         elif isinstance(obj, Review):
             return ReviewRequestSerializer(obj).data
         else:
@@ -78,7 +66,6 @@ class UserBorrowRequestSerializer_(serializers.ModelSerializer):
     def validate(self, data):
         user = self.context['request'].user
         book = self.context['view'].kwargs.get('pk')
-
 
         if BorrowRequest.objects.filter(user=user, book_id=book, status='pending').exists():
             raise serializers.ValidationError("!شما یک درخواست درحال بررسی دارید")

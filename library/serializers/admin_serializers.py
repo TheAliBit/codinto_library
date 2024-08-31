@@ -1,68 +1,26 @@
 from rest_framework import serializers
-from core.utils import User
-from library.models import Book, BorrowRequest, ExtensionRequest, Review
+from library.models import BaseRequestModel, BorrowRequest, ExtensionRequest, Review
+from library.serializers.book_serializers import FullBookSerializer
+from library.serializers.review_serializers import SimpleReviewSerializer
+from library.serializers.user_serializers import FullUserSerializer
+from library.serializers.Request_serializers import BorrowRequestSerializer, ExtensionRequestSerializer
 
 
-class AdminUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'username']
-        read_only_fields = ['id', 'username']
-
-
-class AdminBookSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Book
-        fields = ['id', 'title']
-        read_only_fields = ['id', 'title']
-
-
-class AdminBorrowRequestSerializer(serializers.ModelSerializer):
-    book = AdminBookSerializer(read_only=True)
-    request_type = serializers.SerializerMethodField()
-
-    class Meta:
-        model = BorrowRequest
-        fields = ['request_type', 'id', 'created_at', 'duration', 'status', 'book']
-
-    def get_request_type(self, obj):
-        return 'BorrowRequest'
-
-
-class AdminExtensionRequestSerializer(serializers.ModelSerializer):
-    book = AdminBookSerializer(read_only=True)
-    request_type = serializers.SerializerMethodField()
-
-    class Meta:
-        model = ExtensionRequest
-        fields = ['request_type', 'id', 'created_at', 'duration', 'status', 'book']
-
-    def get_request_type(self, obj):
-        return 'ExtensionRequest'
-
-
-class AdminReviewRequestSerializer(serializers.ModelSerializer):
-    book = AdminBookSerializer(read_only=True)
-    request_type = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Review
-        fields = ['request_type', 'id', 'created_at', 'score', 'description', 'state', 'book']
-
-    def get_request_type(self, obj):
-        return 'ReviewRequest'
-
-
-class AdminRequestSerializer(serializers.Serializer):
+class AdminRequestSerializer(serializers.ModelSerializer):
+    user = FullUserSerializer(read_only=True)
+    book = FullBookSerializer(read_only=True)
     request = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BaseRequestModel
+        fields = [
+            'id', 'created_at', 'updated_at', 'request', 'user', 'book'
+        ]
 
     def get_request(self, obj):
         if isinstance(obj, BorrowRequest):
-            serializer = AdminBorrowRequestSerializer(obj)
+            return BorrowRequestSerializer(obj).data
         elif isinstance(obj, ExtensionRequest):
-            serializer = AdminExtensionRequestSerializer(obj)
+            return ExtensionRequestSerializer(obj).data
         elif isinstance(obj, Review):
-            serializer = AdminReviewRequestSerializer(obj)
-        else:
-            return None
-        return serializer.data
+            return SimpleReviewSerializer(obj).data

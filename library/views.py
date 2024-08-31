@@ -1,8 +1,8 @@
 from itertools import chain
-
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import DestroyAPIView, UpdateAPIView, RetrieveAPIView, GenericAPIView, CreateAPIView, \
     get_object_or_404, ListAPIView
+from rest_framework.mixins import ListModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -16,11 +16,11 @@ from .models import Book, Category, Review, BorrowRequest, ExtensionRequest
 from library.serializers.home_page_serializers import BookSerializer
 from library.serializers.category_serializers import CategorySerializer
 from library.serializers.book_serializers import FullBookSerializer
-from library.filters import CustomBookFilterSet, CustomReviewFilterSet
+from library.filters import CustomBookFilterSet
 
 from django.db.models import Count, Q
 
-from .serializers.Request_serializers import UserRequestSerializer, UserBorrowRequestSerializer, \
+from .serializers.Request_serializers import UserRequestSerializer, \
     UserBorrowRequestSerializer_
 from .serializers.admin_serializers import AdminRequestSerializer
 from .serializers.review_serializers import DetailedReviewSerializer
@@ -73,7 +73,7 @@ class HomePageAPIView(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
-class SearchListAPIView(generics.ListAPIView):
+class SearchListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Book.objects.all()
     serializer_class = FullBookSerializer
@@ -83,14 +83,18 @@ class SearchListAPIView(generics.ListAPIView):
     search_fields = ['title']
 
 
-class UserReviewListView(generics.ListAPIView):
+class UserReviewListView(ListAPIView):
     serializer_class = DetailedReviewSerializer
-    filterset_class = CustomReviewFilterSet
+
+    # filterset_class = CustomReviewFilterSet
 
     def get_queryset(self):
         user = self.request.user
         queryset = Review.objects.filter(user=user)
         return queryset.order_by('-created_at')
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
 
 class UserReveiwDetailView(generics.RetrieveAPIView, DestroyAPIView, UpdateAPIView):
@@ -138,10 +142,3 @@ class AdminRequestView(ListAPIView):
         combined_queryset = list(chain(borrow_requests, extension_requests, review_requests))
         combined_queryset.sort(key=lambda x: x.created_at, reverse=True)
         return combined_queryset
-
-
-class AdminSingleRequestView(DestroyAPIView, UpdateAPIView):
-    serializer_class = AdminRequestSerializer
-
-    def get_queryset(self):
-        ...

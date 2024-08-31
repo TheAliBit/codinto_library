@@ -5,7 +5,6 @@ from library.views import CategoryViewSet, HomePageAPIView, BookViewSet, SearchL
     UserReveiwDetailView, DetailedBookView, RequestsListView, UserBorrowRequestView, AdminRequestView
 
 router = DefaultRouter()
-# router.register('book-list', BookViewSet, basename='book-list')
 
 urlpatterns = [
                   path('home/', HomePageAPIView.as_view(), name='صفحه اصلی سامانه'),
@@ -18,5 +17,5 @@ urlpatterns = [
                   path('book-list/<int:pk>/borrow/', UserBorrowRequestView.as_view(), name='user-requests'),
                   path('requests/', RequestsListView.as_view(), name='request-list'),
                   path('handler/request/', AdminRequestView.as_view(), name='admin-request'),
-
+                  # path('handler/request/<int:pk>/',AdminSingleRequestView.as_view(),name='admin-single-request'),
               ] + router.urls

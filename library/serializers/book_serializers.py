@@ -14,10 +14,8 @@ class FullBookSerializer(serializers.ModelSerializer):
 
 
 class SimpleBookSerializer(serializers.ModelSerializer):
-    book_id = serializers.CharField(source='book.id', read_only=True)
-
     class Meta:
         model = Book
         fields = [
-            'book_id', 'title', 'image'
+            'id', 'title', 'image'
         ]
