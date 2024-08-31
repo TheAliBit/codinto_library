@@ -1,7 +1,8 @@
 from itertools import chain
 
 from rest_framework.filters import SearchFilter
-from rest_framework.generics import DestroyAPIView, UpdateAPIView, RetrieveAPIView
+from rest_framework.generics import DestroyAPIView, UpdateAPIView, RetrieveAPIView, GenericAPIView, CreateAPIView, \
+    get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -19,7 +20,8 @@ from library.filters import CustomBookFilterSet, CustomReviewFilterSet
 
 from django.db.models import Count, Q
 
-from .serializers.Request_serializers import UserRequestSerializer
+from .serializers.Request_serializers import UserRequestSerializer, UserBorrowRequestSerializer, \
+    UserBorrowRequestSerializer_
 from .serializers.review_serializers import DetailedReviewSerializer
 
 
@@ -108,5 +110,19 @@ class RequestsListView(generics.ListAPIView):
         review_requests = Review.objects.filter(user=user)
         combined_queryset = list(chain(borrow_requests, extension_requests, review_requests))
         combined_queryset.sort(key=lambda x: x.created_at, reverse=True)
-        return combined_queryset 
+        return combined_queryset
 
+
+class UserBorrowRequestView(CreateAPIView):
+    serializer_class = UserBorrowRequestSerializer_
+
+    def create(self, request, *args, **kwargs):
+        book_id = kwargs.get('pk')
+        book = get_object_or_404(Book, pk=book_id)
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save(book=book, user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

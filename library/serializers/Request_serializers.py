@@ -64,3 +64,17 @@ class UserRequestSerializer(serializers.Serializer):
             return ReviewRequestSerializer(obj).data
         else:
             return None
+
+
+class UserBorrowRequestSerializer_(serializers.ModelSerializer):
+    class Meta:
+        model = BorrowRequest
+        fields = [
+            'id', 'time', 'status'
+        ]
+        read_only_fields = ['status']
+
+    def update(self, instance, validated_data):
+        if 'time' in validated_data:
+            validated_data['status'] = 'pending'
+        return super().update(instance, validated_data)
