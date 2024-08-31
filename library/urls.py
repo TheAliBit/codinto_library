@@ -17,4 +17,5 @@ urlpatterns = [
                   path('book-list/<int:pk>/', DetailedBookView.as_view(), name='book-detail'),
                   path('requests/', RequestsListView.as_view(), name='request-list'),
 
+
               ] + router.urls

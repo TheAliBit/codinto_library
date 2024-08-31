@@ -108,4 +108,5 @@ class RequestsListView(generics.ListAPIView):
         review_requests = Review.objects.filter(user=user)
         combined_queryset = list(chain(borrow_requests, extension_requests, review_requests))
         combined_queryset.sort(key=lambda x: x.created_at, reverse=True)
-        return combined_queryset
+        return combined_queryset 
+
