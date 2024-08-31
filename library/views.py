@@ -2,7 +2,7 @@ from itertools import chain
 
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import DestroyAPIView, UpdateAPIView, RetrieveAPIView, GenericAPIView, CreateAPIView, \
-    get_object_or_404
+    get_object_or_404, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -22,6 +22,7 @@ from django.db.models import Count, Q
 
 from .serializers.Request_serializers import UserRequestSerializer, UserBorrowRequestSerializer, \
     UserBorrowRequestSerializer_
+from .serializers.admin_serializers import AdminRequestSerializer
 from .serializers.review_serializers import DetailedReviewSerializer
 
 
@@ -64,9 +65,9 @@ class HomePageAPIView(APIView):
         most_reviewed_books_data = BookSerializer(most_reviewed_books, many=True).data
 
         data = {
-            'تازه ترین ها': newest_books_data,
-            'پرطرفدار ها': most_popular_books_data,
-            'محبوب ترین ها': most_reviewed_books_data,
+            'newest_books': newest_books_data,
+            'most_borrowed_books': most_popular_books_data,
+            'highest_rated_books': most_reviewed_books_data,
         }
 
         return Response(data, status=status.HTTP_200_OK)
@@ -124,5 +125,23 @@ class UserBorrowRequestView(CreateAPIView):
         if serializer.is_valid():
             serializer.save(book=book, user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AdminRequestView(ListAPIView):
+    serializer_class = AdminRequestSerializer
+
+    def get_queryset(self):
+        borrow_requests = BorrowRequest.objects.all()
+        extension_requests = ExtensionRequest.objects.all()
+        review_requests = Review.objects.all()
+        combined_queryset = list(chain(borrow_requests, extension_requests, review_requests))
+        combined_queryset.sort(key=lambda x: x.created_at, reverse=True)
+        return combined_queryset
+
+
+class AdminSingleRequestView(DestroyAPIView, UpdateAPIView):
+    serializer_class = AdminRequestSerializer
+
+    def get_queryset(self):
+        ...

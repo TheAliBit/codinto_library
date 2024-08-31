@@ -3,6 +3,8 @@ from library.models import Book
 
 
 class FullBookSerializer(serializers.ModelSerializer):
+    category = serializers.CharField(source='category.title', read_only=True)
+
     class Meta:
         model = Book
         fields = [
