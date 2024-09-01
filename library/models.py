@@ -99,6 +99,14 @@ class BaseRequestModel(BaseModel):
     status = models.CharField(max_length=8, choices=STATUS_CHOICES, default='pending', verbose_name="وضعیت")
     duration = models.IntegerField(null=True, blank=True, verbose_name="مدت زمان (روز)")
 
+    REQUEST_TYPE_CHOICES = [
+        ('borrow', 'Borrow'),
+        ('extension', 'Extension'),
+        ('return', 'Return'),
+        ('review', 'Review'),
+    ]
+    type = models.CharField(max_length=12, choices=REQUEST_TYPE_CHOICES, default='borrow', verbose_name="نوع درخواست")
+
     def __str__(self):
         return self.user.username
 
