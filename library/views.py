@@ -21,7 +21,7 @@ from library.filters import CustomBookFilterSet
 from django.db.models import Count, Q
 
 from .serializers.Request_serializers import UserRequestSerializer, \
-    UserBorrowRequestSerializer_, ReturnRequestSerializer
+    UserBorrowRequestSerializer_
 from .serializers.admin_serializers import AdminRequestSerializer
 from .serializers.review_serializers import DetailedReviewSerializer
 
@@ -121,13 +121,21 @@ class RequestsListView(generics.ListAPIView):
 class UserBorrowRequestView(CreateAPIView):
     serializer_class = UserBorrowRequestSerializer_
 
-    def create(self, request, *args, **kwargs):
-        book_id = kwargs.get('pk')
+    def perform_create(self, serializer):
+        book_id = self.kwargs.get('pk')
         book = get_object_or_404(Book, pk=book_id)
+        serializer.save(
+            book=book,
+            user=self.request.user,
+            status='pending',
+            type='borrow'
+        )
+
+    def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid():
-            serializer.save(book=book, user=request.user)
+            self.perform_create(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -138,10 +146,3 @@ class AdminRequestView(ListAPIView):
     def get_queryset(self):
         queryset = BaseRequestModel.objects.all()
         return queryset.order_by('-created_at')
-
-
-class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
-    serializer_class = ReturnRequestSerializer
-
-    def get_queryset(self):
-        return BaseRequestModel.objects.all()

@@ -68,10 +68,9 @@ class UserBorrowRequestSerializer_(serializers.ModelSerializer):
     class Meta:
         model = BorrowRequest
         fields = [
-            'id', 'time', 'status'
+            'id', 'time', 'status', 'type'
         ]
-
-        read_only_fields = ['status']
+        read_only_fields = ['status', 'type']
 
     def validate(self, data):
         user = self.context['request'].user

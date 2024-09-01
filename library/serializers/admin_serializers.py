@@ -15,7 +15,7 @@ class AdminRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = BaseRequestModel
         fields = [
-            'id', 'created_at', 'updated_at', 'request_detail', 'user', 'book'
+            'id', 'created_at', 'updated_at', 'type', 'request_detail', 'user', 'book'
         ]
 
     def get_request_detail(self, obj):
