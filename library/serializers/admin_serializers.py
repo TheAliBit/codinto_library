@@ -3,7 +3,8 @@ from library.models import BaseRequestModel, BorrowRequest, ExtensionRequest, Re
 from library.serializers.book_serializers import FullBookSerializer
 from library.serializers.review_serializers import SimpleReviewSerializer
 from library.serializers.user_serializers import FullUserSerializer
-from library.serializers.Request_serializers import BorrowRequestSerializer, ExtensionRequestSerializer
+from library.serializers.Request_serializers import BorrowRequestSerializer, ExtensionRequestSerializer, \
+    ViewReturnRequestSerializer
 
 
 class AdminRequestSerializer(serializers.ModelSerializer):
@@ -26,24 +27,3 @@ class AdminRequestSerializer(serializers.ModelSerializer):
             return SimpleReviewSerializer(obj).data
         elif isinstance(obj, BaseRequestModel):
             return ViewReturnRequestSerializer(obj).data
-
-
-class ReturnRequestSerializer(serializers.ModelSerializer):
-    CHOICES = [('accepted', 'Accepted'), ('pending', 'Pending')]
-    status = serializers.ChoiceField(choices=CHOICES, default='pending')
-    type = serializers.SerializerMethodField()
-
-    class Meta:
-        model = BaseRequestModel
-        fields = ['type', 'id', 'status']
-
-
-class ViewReturnRequestSerializer(serializers.ModelSerializer):
-    type = serializers.SerializerMethodField()
-
-    class Meta:
-        model = BaseRequestModel
-        fields = ['type', 'id', 'status']
-
-    def get_type(self, obj):
-        return "return_request"

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from library.models import BorrowRequest, Book, ExtensionRequest, Review, ReviewRequest
+from library.models import BorrowRequest, Book, ExtensionRequest, Review, ReviewRequest, ReturnRequest
 
 
 class BookDetailForBorrowRequestSerializer(serializers.ModelSerializer):
@@ -80,3 +80,27 @@ class UserBorrowRequestSerializer_(serializers.ModelSerializer):
         if BorrowRequest.objects.filter(user=user, book_id=book, status='pending').exists():
             raise serializers.ValidationError("!شما یک درخواست درحال بررسی دارید")
         return data
+
+
+class ReturnRequestSerializer(serializers.ModelSerializer):
+    CHOICES = [('accepted', 'Accepted'), ('pending', 'Pending')]
+    status = serializers.ChoiceField(choices=CHOICES, default='pending')
+    type = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ReturnRequest
+        fields = ['type', 'id', 'status']
+
+    def get_type(self, obj):
+        return "return_request"
+
+
+class ViewReturnRequestSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ReturnRequest
+        fields = ['type', 'id', 'status']
+
+    def get_type(self, obj):
+        return "return_request"

@@ -21,7 +21,7 @@ from library.filters import CustomBookFilterSet
 from django.db.models import Count, Q
 
 from .serializers.Request_serializers import UserRequestSerializer, \
-    UserBorrowRequestSerializer_
+    UserBorrowRequestSerializer_, ReturnRequestSerializer
 from .serializers.admin_serializers import AdminRequestSerializer
 from .serializers.review_serializers import DetailedReviewSerializer
 
@@ -138,3 +138,10 @@ class AdminRequestView(ListAPIView):
     def get_queryset(self):
         queryset = BaseRequestModel.objects.all()
         return queryset.order_by('-created_at')
+
+
+class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
+    serializer_class = ReturnRequestSerializer
+
+    def get_queryset(self):
+        return BaseRequestModel.objects.all()

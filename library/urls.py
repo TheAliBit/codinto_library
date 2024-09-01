@@ -2,13 +2,14 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from library.views import CategoryViewSet, HomePageAPIView, BookViewSet, SearchListAPIView, UserReviewListView, \
-    UserReveiwDetailView, DetailedBookView, RequestsListView, UserBorrowRequestView, AdminRequestView
+    UserReveiwDetailView, DetailedBookView, RequestsListView, UserBorrowRequestView, AdminRequestView, \
+    AdminSingleRequestView
 
 router = DefaultRouter()
 
 urlpatterns = [
-                  path('home/', HomePageAPIView.as_view(), name='صفحه اصلی سامانه'),
-                  path('search/', SearchListAPIView.as_view(), name='صفحه جست و جو سامانه'),
+                  path('home/', HomePageAPIView.as_view(), name='home'),
+                  path('search/', SearchListAPIView.as_view(), name='search'),
                   path('category/', CategoryViewSet.as_view({'get': 'list', 'post': 'create'}), name='category-list'),
                   path('reviews/', UserReviewListView.as_view(), name='review-detail'),
                   path('reviews/<int:pk>/', UserReveiwDetailView.as_view(), name='review-detail'),
@@ -17,5 +18,5 @@ urlpatterns = [
                   path('book-list/<int:pk>/borrow/', UserBorrowRequestView.as_view(), name='user-requests'),
                   path('requests/', RequestsListView.as_view(), name='request-list'),
                   path('handler/request/', AdminRequestView.as_view(), name='admin-request'),
-                  # path('handler/request/<int:pk>/',AdminSingleRequestView.as_view(),name='admin-single-request'),
+                  path('handler/request/<int:pk>/', AdminSingleRequestView.as_view(), name='admin-single-request'),
               ] + router.urls
