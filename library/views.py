@@ -12,7 +12,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 
-from .models import Book, Category, Review, BorrowRequest, ExtensionRequest
+from .models import Book, Category, Review, BorrowRequest, ExtensionRequest, ReturnRequest, BaseRequestModel
 from library.serializers.home_page_serializers import BookSerializer
 from library.serializers.category_serializers import CategorySerializer
 from library.serializers.book_serializers import FullBookSerializer
@@ -136,9 +136,5 @@ class AdminRequestView(ListAPIView):
     serializer_class = AdminRequestSerializer
 
     def get_queryset(self):
-        borrow_requests = BorrowRequest.objects.all()
-        extension_requests = ExtensionRequest.objects.all()
-        review_requests = Review.objects.all()
-        combined_queryset = list(chain(borrow_requests, extension_requests, review_requests))
-        combined_queryset.sort(key=lambda x: x.created_at, reverse=True)
-        return combined_queryset
+        queryset = BaseRequestModel.objects.all()
+        return queryset.order_by('-created_at')
