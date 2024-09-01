@@ -1,6 +1,5 @@
-from django.template.context_processors import request
 from rest_framework import serializers
-from library.models import BaseRequestModel, BorrowRequest, ExtensionRequest, Review, ReturnRequest
+from library.models import BaseRequestModel
 from library.serializers.book_serializers import FullBookSerializer
 from library.serializers.review_serializers import SimpleReviewSerializer
 from library.serializers.user_serializers import FullUserSerializer
@@ -16,7 +15,7 @@ class AdminRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = BaseRequestModel
         fields = [
-            'id', 'created_at', 'updated_at', 'request_detail', 'user', 'book'
+            'id', 'created_at', 'updated_at', 'request_detail', 'user', 'book', 'status'
         ]
 
     def get_request_detail(self, obj):
@@ -30,3 +29,10 @@ class AdminRequestSerializer(serializers.ModelSerializer):
         serializer_class = SERIALIZER_CHOICES.get(request_type)
         serializer = serializer_class(obj)
         return serializer.data
+
+    def validate_status(self, value):
+        valid_status = ['accepted', 'pending']
+        request_type = self.initial_data.get('type')
+        if value not in valid_status:
+            raise serializers.ValidationError("!وضعیت برای درخواست تحویل امکان رد شدن ندارد")
+        return value

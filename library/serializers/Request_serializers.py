@@ -99,3 +99,10 @@ class ViewReturnRequestSerializer(serializers.ModelSerializer):
         model = ReturnRequest
         fields = ['type', 'id', 'status']
 
+    # def validate(self, value):
+    #     valid_status = ['accepted', 'pending']
+    #     if value not in valid_status:
+    #         print('1')
+    #         raise serializers.ValidationError("!وضعیت برای درخواست تحویل نمیتواند رد شود")
+    #     print('1')
+    #     return value

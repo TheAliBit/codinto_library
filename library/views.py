@@ -1,8 +1,7 @@
 from itertools import chain
 from rest_framework.filters import SearchFilter
-from rest_framework.generics import DestroyAPIView, UpdateAPIView, RetrieveAPIView, GenericAPIView, CreateAPIView, \
+from rest_framework.generics import DestroyAPIView, UpdateAPIView, RetrieveAPIView, CreateAPIView, \
     get_object_or_404, ListAPIView
-from rest_framework.mixins import ListModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -12,7 +11,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 
-from .models import Book, Category, Review, BorrowRequest, ExtensionRequest, ReturnRequest, BaseRequestModel
+from .models import Book, Category, Review, BorrowRequest, ExtensionRequest, BaseRequestModel
 from library.serializers.home_page_serializers import BookSerializer
 from library.serializers.category_serializers import CategorySerializer
 from library.serializers.book_serializers import FullBookSerializer
@@ -146,3 +145,10 @@ class AdminRequestView(ListAPIView):
     def get_queryset(self):
         queryset = BaseRequestModel.objects.all()
         return queryset.order_by('-created_at')
+
+
+class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
+    serializer_class = AdminRequestSerializer
+
+    def get_queryset(self):
+        return BaseRequestModel.objects.all()
