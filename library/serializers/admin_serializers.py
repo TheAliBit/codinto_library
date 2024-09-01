@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from library.models import BaseRequestModel, BorrowRequest, ExtensionRequest, Review
+from library.models import BaseRequestModel, BorrowRequest, ExtensionRequest, Review, ReturnRequest
 from library.serializers.book_serializers import FullBookSerializer
 from library.serializers.review_serializers import SimpleReviewSerializer
 from library.serializers.user_serializers import FullUserSerializer
@@ -25,5 +25,5 @@ class AdminRequestSerializer(serializers.ModelSerializer):
             return ExtensionRequestSerializer(obj).data
         elif isinstance(obj, Review):
             return SimpleReviewSerializer(obj).data
-        elif isinstance(obj, BaseRequestModel):
+        elif isinstance(obj, ReturnRequest):
             return ViewReturnRequestSerializer(obj).data
