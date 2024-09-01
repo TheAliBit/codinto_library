@@ -1,3 +1,4 @@
+from django.template.context_processors import request
 from rest_framework import serializers
 from library.models import BaseRequestModel, BorrowRequest, ExtensionRequest, Review, ReturnRequest
 from library.serializers.book_serializers import FullBookSerializer
@@ -15,15 +16,17 @@ class AdminRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = BaseRequestModel
         fields = [
-            'id', 'created_at', 'updated_at', 'type', 'request_detail', 'user', 'book'
+            'id', 'created_at', 'updated_at', 'request_detail', 'user', 'book'
         ]
 
     def get_request_detail(self, obj):
-        if isinstance(obj, BorrowRequest):
-            return BorrowRequestSerializer(obj).data
-        elif isinstance(obj, ExtensionRequest):
-            return ExtensionRequestSerializer(obj).data
-        elif isinstance(obj, Review):
-            return SimpleReviewSerializer(obj).data
-        elif isinstance(obj, ReturnRequest):
-            return ViewReturnRequestSerializer(obj).data
+        SERIALIZER_CHOICES = {
+            'borrow': BorrowRequestSerializer,
+            'extension': ExtensionRequestSerializer,
+            'review': SimpleReviewSerializer,
+            'return': ViewReturnRequestSerializer
+        }
+        request_type = obj.type
+        serializer_class = SERIALIZER_CHOICES.get(request_type)
+        serializer = serializer_class(obj)
+        return serializer.data

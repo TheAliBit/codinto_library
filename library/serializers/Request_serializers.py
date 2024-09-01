@@ -95,11 +95,7 @@ class ReturnRequestSerializer(serializers.ModelSerializer):
 
 
 class ViewReturnRequestSerializer(serializers.ModelSerializer):
-    type = serializers.SerializerMethodField()
-
     class Meta:
         model = ReturnRequest
         fields = ['type', 'id', 'status']
 
-    def get_type(self, obj):
-        return "return_request"
