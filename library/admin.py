@@ -1,5 +1,6 @@
 from django.contrib import admin
-from library.models import Category, Book, Review, Notification, BorrowRequest, ExtensionRequest, ReviewRequest, History
+from library.models import Category, Book, Review, Notification, BorrowRequest, ExtensionRequest, ReviewRequest, \
+    History
 
 # Register your models here.
 admin.site.register(Category)

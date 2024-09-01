@@ -24,3 +24,26 @@ class AdminRequestSerializer(serializers.ModelSerializer):
             return ExtensionRequestSerializer(obj).data
         elif isinstance(obj, Review):
             return SimpleReviewSerializer(obj).data
+        elif isinstance(obj, BaseRequestModel):
+            return ViewReturnRequestSerializer(obj).data
+
+
+class ReturnRequestSerializer(serializers.ModelSerializer):
+    CHOICES = [('accepted', 'Accepted'), ('pending', 'Pending')]
+    status = serializers.ChoiceField(choices=CHOICES, default='pending')
+    type = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BaseRequestModel
+        fields = ['type', 'id', 'status']
+
+
+class ViewReturnRequestSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BaseRequestModel
+        fields = ['type', 'id', 'status']
+
+    def get_type(self, obj):
+        return "return_request"
