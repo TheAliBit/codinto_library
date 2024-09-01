@@ -135,6 +135,11 @@ class ReviewRequest(BaseRequestModel):
         verbose_name = "درخواست بررسی"
         verbose_name_plural = "درخواست‌های بررسی"
 
+    class ReturnRequest(BaseRequestModel):
+        class Meta:
+            verbose_name = "درخواست بازگشت"
+            verbose_name_plural = "درخواست‌های بازگشت"
+
 
 class History(BaseModel, models.Model):
     user = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, verbose_name="کاربر")
