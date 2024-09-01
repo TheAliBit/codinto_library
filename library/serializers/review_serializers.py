@@ -27,6 +27,13 @@ class DetailedReviewSerializer(serializers.ModelSerializer):
 
 
 class SimpleReviewSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+
     class Meta:
         model = Review
-        fields = ['id', 'score', 'description', 'state']
+        fields = [
+            'type', 'id', 'score', 'description', 'state'
+        ]
+
+    def get_type(self, obj):
+        return "review_request"

@@ -10,19 +10,29 @@ class BookDetailForBorrowRequestSerializer(serializers.ModelSerializer):
 
 
 class BorrowRequestSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+
     class Meta:
         model = BorrowRequest
         fields = [
-            'id', 'duration', 'status'
+            'type', 'id', 'duration', 'status'
         ]
+
+    def get_type(self, obj):
+        return "borrow_request"
 
 
 class ExtensionRequestSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+
     class Meta:
         model = ExtensionRequest
         fields = [
-            'id', 'duration', 'status'
+            'type', 'id', 'duration', 'status'
         ]
+
+    def get_type(self, obj):
+        return "extension_request"
 
 
 class ReviewRequestSerializer(serializers.ModelSerializer):
