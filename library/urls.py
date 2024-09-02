@@ -19,4 +19,5 @@ urlpatterns = [
                   path('requests/', RequestsListView.as_view(), name='request-list'),
                   path('handler/request/', AdminRequestView.as_view(), name='admin-request'),
                   path('handler/request/<int:pk>/', AdminSingleRequestView.as_view(), name='admin-single-request'),
+                  path(empty)
               ] + router.urls
