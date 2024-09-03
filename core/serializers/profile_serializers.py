@@ -8,7 +8,7 @@ from core.models import Profile
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['username', 'first_name', 'last_name', 'phone_number', 'email', 'telegram_id', 'picture']
+        fields = ['id', 'username', 'first_name', 'last_name', 'phone_number', 'email', 'telegram_id', 'picture']
 
     def to_representation(self, instance):
         result = super().to_representation(instance)
