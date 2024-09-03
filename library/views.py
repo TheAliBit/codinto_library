@@ -12,7 +12,7 @@ from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Book, Category, Review, BorrowRequest, ExtensionRequest, BaseRequestModel
-from library.serializers.home_page_serializers import BookSerializer
+from library.serializers.home_page_serializers import BookSerializer, BookSerializerForAdmin
 from library.serializers.category_serializers import CategorySerializer
 from library.serializers.book_serializers import FullBookSerializer
 from library.filters import CustomBookFilterSet
@@ -153,3 +153,16 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
 
     def get_queryset(self):
         return BaseRequestModel.objects.all()
+
+
+class AdminBookView(ListAPIView):
+    serializer_class = BookSerializer
+    search_fields = ['title']
+
+    def get_queryset(self):
+        queryset = Book.objects.all()
+        return queryset.order_by('-created_at')
+
+# class AdminSingleBookView(CreateAPIView, ListAPIView, UpdateAPIView, DestroyAPIView):
+#     queryset = Book.objects.all()
+#     serializer_class = BookSerializerForAdmin
