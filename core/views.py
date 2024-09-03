@@ -1,6 +1,8 @@
+from msilib import Directory
+
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
-from rest_framework.generics import ListAPIView, CreateAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.db import transaction
@@ -96,3 +98,9 @@ class AdminListProfileView(ListAPIView, CreateAPIView):
     search_fields = ['username', 'first_name', 'last_name', 'email', 'phone_number', 'telegram_id']
     queryset = Profile.objects.all()
 
+
+class AdminSingleProfileView(RetrieveAPIView, UpdateAPIView, DestroyAPIView):
+    serializer_class = ProfileSerializer
+
+    def get_queryset(self):
+        return Profile.objects.all()
