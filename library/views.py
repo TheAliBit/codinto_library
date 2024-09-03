@@ -141,6 +141,7 @@ class UserBorrowRequestView(CreateAPIView):
 
 class AdminRequestView(ListAPIView):
     serializer_class = AdminRequestSerializer
+    search_fields = ['status']
 
     def get_queryset(self):
         queryset = BaseRequestModel.objects.all()
