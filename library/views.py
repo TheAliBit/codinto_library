@@ -163,6 +163,9 @@ class AdminBookView(ListAPIView):
         queryset = Book.objects.all()
         return queryset.order_by('-created_at')
 
-# class AdminSingleBookView(CreateAPIView, ListAPIView, UpdateAPIView, DestroyAPIView):
-#     queryset = Book.objects.all()
-#     serializer_class = BookSerializerForAdmin
+
+class AdminSingleBookView(RetrieveAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
+    serializer_class = BookSerializerForAdmin
+
+    def get_queryset(self):
+        return Book.objects.all()

@@ -36,3 +36,13 @@ class BookDetailSerializer(serializers.ModelSerializer):
     def get_reviews(self, obj):
         accepted_reviews = obj.reviews.filter(state='accepted').select_related('user')
         return ReviewSerializer(accepted_reviews, many=True).data
+
+
+class BookSerializerForAdmin(serializers.ModelSerializer):
+    class Meta:
+        model = Book
+        fields = [
+            'id', 'title', 'image', 'author', 'translator', 'publisher',
+            'volume_number', 'publication_year', 'page_count', 'owner',
+            'description', 'count', 'category',
+        ]
