@@ -1,4 +1,6 @@
+from pkg_resources import require
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from codinto_library import settings
 from library.models import Book, Review
@@ -38,6 +40,21 @@ class BookDetailSerializer(serializers.ModelSerializer):
         return ReviewSerializer(accepted_reviews, many=True).data
 
 
+class BookListSerializerForAdmin(serializers.ModelSerializer):
+    class Meta:
+        model = Book
+        fields = [
+            'id', 'title', 'image', 'author', 'translator', 'publisher',
+            'volume_number', 'publication_year', 'page_count', 'owner',
+            'description', 'count', 'category',
+        ]
+
+    def validate_title(self, value):
+        if Book.objects.filter(title=value).exists():
+            raise ValidationError("!کتابی با این نام موجود هست")
+        return value
+
+
 class BookSerializerForAdmin(serializers.ModelSerializer):
     class Meta:
         model = Book
@@ -46,3 +63,8 @@ class BookSerializerForAdmin(serializers.ModelSerializer):
             'volume_number', 'publication_year', 'page_count', 'owner',
             'description', 'count', 'category',
         ]
+
+    def validate_title(self, value):
+        if Book.objects.filter(title=value).exists():
+            raise ValidationError("!کتابی با این نام موجود هست")
+        return value
