@@ -11,7 +11,7 @@ from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from django.contrib.auth import authenticate, get_user_model
 from .utils import black_list_refresh_token, get_access_from_refresh
 from core.serializers.registration_serializers import LoginSerializer, RefreshSerializer
-from core.serializers.profile_serializers import ProfileSerializer
+from core.serializers.profile_serializers import ProfileSerializer, AdminSingleProfileSerializer
 from rest_framework import status, mixins, generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -100,7 +100,7 @@ class AdminListProfileView(ListAPIView, CreateAPIView):
 
 
 class AdminSingleProfileView(RetrieveAPIView, UpdateAPIView, DestroyAPIView):
-    serializer_class = ProfileSerializer
+    serializer_class = AdminSingleProfileSerializer
 
     def get_queryset(self):
         return Profile.objects.all()

@@ -1,7 +1,5 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
-from setuptools.extern import names
-
 from core.views import LoginAPIView, LogoutAPIView, RefreshAPIView, ProfileUpdateView, SearchUserView, \
     AdminListProfileView, AdminSingleProfileView
 
