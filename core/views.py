@@ -1,5 +1,6 @@
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.db import transaction
@@ -82,3 +83,9 @@ class ProfileUpdateView(mixins.RetrieveModelMixin,
 
     def perform_update(self, serializer):
         serializer.save()
+
+
+class SearchUserView(ListAPIView):
+    serializer_class = ProfileSerializer
+    search_fields = ['username', 'first_name', 'last_name', 'email', 'phone_number', 'telegram_id']
+    queryset = Profile.objects.all()
