@@ -13,3 +13,8 @@ class ProfileSerializer(serializers.ModelSerializer):
         result = super().to_representation(instance)
         result['picture'] = settings.DOMAIN + instance.picture.url if instance.picture else None
         return result
+
+    def validate_username(self, value):
+        if Profile.objects.filter(username=value).exists():
+            raise serializers.ValidationError("!کاربری با این نام کاربری وجود دارد")
+        return value

@@ -1,6 +1,6 @@
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.db import transaction
@@ -91,6 +91,8 @@ class SearchUserView(ListAPIView):
     queryset = Profile.objects.all()
 
 
-class ListProfileView(ListAPIView):
+class ListProfileView(ListAPIView,CreateAPIView):
     serializer_class = ProfileSerializer
     queryset = Profile.objects.all()
+
+
