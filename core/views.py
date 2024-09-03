@@ -89,3 +89,8 @@ class SearchUserView(ListAPIView):
     serializer_class = ProfileSerializer
     search_fields = ['username', 'first_name', 'last_name', 'email', 'phone_number', 'telegram_id']
     queryset = Profile.objects.all()
+
+
+class ListProfileView(ListAPIView):
+    serializer_class = ProfileSerializer
+    queryset = Profile.objects.all()
