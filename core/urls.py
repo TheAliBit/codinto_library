@@ -6,11 +6,11 @@ from core.views import LoginAPIView, LogoutAPIView, RefreshAPIView, ProfileUpdat
 router = DefaultRouter()
 
 urlpatterns = [
-                  path('login/', LoginAPIView.as_view(), name='ورود'),
-                  path('logout/', LogoutAPIView.as_view(), name='خروج'),
-                  path('refresh/', RefreshAPIView.as_view(), name='رفرش'),
-                  path('profile/', ProfileUpdateView.as_view(), name='پروفایل'),
-                  path('super-user/search-user/', SearchUserView.as_view(), name='search-user'),
+                  path('user/login/', LoginAPIView.as_view(), name='ورود'),
+                  path('user/logout/', LogoutAPIView.as_view(), name='خروج'),
+                  path('user/refresh/', RefreshAPIView.as_view(), name='رفرش'),
+                  path('user/profile/', ProfileUpdateView.as_view(), name='پروفایل'),
+                  path('super-user/search-users/', SearchUserView.as_view(), name='search-user'),
                   path('super-user/users/', AdminListProfileView.as_view(), name='list-profile'),
                   path('super-user/users/<int:pk>/', AdminSingleProfileView.as_view(), name='single-profile'),
 
