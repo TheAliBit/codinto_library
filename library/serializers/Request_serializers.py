@@ -107,6 +107,7 @@ class ViewReturnRequestSerializer(serializers.ModelSerializer):
     #     print('1')
     #     return value
 
+
 class UserExtensionRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExtensionRequest
@@ -119,6 +120,10 @@ class UserExtensionRequestSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         book = self.context['view'].kwargs.get('pk')
 
-        if BorrowRequest.objects.filter(user=user, book_id=book, status='pending').exists():
+        if not BorrowRequest.objects.filter(user=user, book_id=book, status='accepted').exists():
+            raise serializers.ValidationError("!شما در حال حاظر درخواست امانت در جریانی ندارید")
+
+        elif ExtensionRequest.objects.filter(user=user, book_id=book, status='pending').exists():
             raise serializers.ValidationError("!شما یک درخواست درحال بررسی دارید")
+
         return data
