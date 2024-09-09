@@ -19,7 +19,7 @@ from library.filters import CustomBookFilterSet
 from django.db.models import Count, Q
 
 from .serializers.Request_serializers import UserRequestSerializer, \
-    UserBorrowRequestSerializer, UserExtensionRequestSerializer, UserReturnRequestSerializer
+    UserBorrowRequestSerializer, UserExtensionRequestSerializer, UserReturnRequestSerializer, BaseRequestSerializer
 from .serializers.admin_serializers import AdminRequestSerializer
 from .serializers.review_serializers import DetailedReviewSerializer
 
@@ -212,3 +212,10 @@ class AdminSingleBookView(RetrieveAPIView, UpdateAPIView, DestroyAPIView):
 
     def get_queryset(self):
         return Book.objects.all()
+
+
+class UserMyBookView(ListAPIView):
+    serializer_class = BaseRequestSerializer
+
+    def get_queryset(self):
+        return BaseRequestModel.objects.filter(user=self.request.user, status='accepted', type='borrow')

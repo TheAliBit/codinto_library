@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from library.models import BorrowRequest, Book, ExtensionRequest, Review, ReturnRequest
+from library.models import BorrowRequest, Book, ExtensionRequest, Review, ReturnRequest, BaseRequestModel
+from library.serializers.book_serializers import SimpleBookSerializer
 
 
 class BookDetailForBorrowRequestSerializer(serializers.ModelSerializer):
@@ -150,3 +151,13 @@ class UserReturnRequestSerializer(serializers.ModelSerializer):
         elif ReturnRequest.objects.filter(user=user, book_id=book, status='accpeted').exists():
             raise serializers.ValidationError("! شما یکبار این کتاب را تحویل دادید")
         return data
+
+
+class BaseRequestSerializer(serializers.ModelSerializer):
+    book = SimpleBookSerializer(read_only=True)
+
+    class Meta:
+        model = BaseRequestModel
+        fields = [
+            'id', 'book', 'duration'
+        ]
