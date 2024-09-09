@@ -19,7 +19,7 @@ from library.filters import CustomBookFilterSet
 from django.db.models import Count, Q
 
 from .serializers.Request_serializers import UserRequestSerializer, \
-    UserBorrowRequestSerializer_
+    UserBorrowRequestSerializer, UserExtensionRequestSerializer
 from .serializers.admin_serializers import AdminRequestSerializer
 from .serializers.review_serializers import DetailedReviewSerializer
 
@@ -117,7 +117,7 @@ class RequestsListView(generics.ListAPIView):
 
 
 class UserBorrowRequestView(CreateAPIView):
-    serializer_class = UserBorrowRequestSerializer_
+    serializer_class = UserBorrowRequestSerializer
 
     def perform_create(self, serializer):
         book_id = self.kwargs.get('pk')
@@ -136,6 +136,11 @@ class UserBorrowRequestView(CreateAPIView):
             self.perform_create(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserExtensionRequestView(CreateAPIView):
+    serializer_class = UserExtensionRequestSerializer
+    ...
 
 
 class AdminRequestView(ListAPIView):

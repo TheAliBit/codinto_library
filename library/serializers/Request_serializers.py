@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from library.models import BorrowRequest, Book, ExtensionRequest, Review, ReviewRequest, ReturnRequest
+from library.models import BorrowRequest, Book, ExtensionRequest, Review, ReturnRequest
 
 
 class BookDetailForBorrowRequestSerializer(serializers.ModelSerializer):
@@ -64,7 +64,7 @@ class UserRequestSerializer(serializers.Serializer):
             return None
 
 
-class UserBorrowRequestSerializer_(serializers.ModelSerializer):
+class UserBorrowRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = BorrowRequest
         fields = [
@@ -106,3 +106,19 @@ class ViewReturnRequestSerializer(serializers.ModelSerializer):
     #         raise serializers.ValidationError("!وضعیت برای درخواست تحویل نمیتواند رد شود")
     #     print('1')
     #     return value
+
+class UserExtensionRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExtensionRequest
+        fields = [
+            'id', 'time', 'status', 'type'
+        ]
+        read_only_fields = ['status', 'type']
+
+    def validate(self, data):
+        user = self.context['request'].user
+        book = self.context['view'].kwargs.get('pk')
+
+        if BorrowRequest.objects.filter(user=user, book_id=book, status='pending').exists():
+            raise serializers.ValidationError("!شما یک درخواست درحال بررسی دارید")
+        return data
