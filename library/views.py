@@ -19,7 +19,7 @@ from library.filters import CustomBookFilterSet
 from django.db.models import Count, Q
 
 from .serializers.Request_serializers import UserRequestSerializer, \
-    UserBorrowRequestSerializer, UserExtensionRequestSerializer
+    UserBorrowRequestSerializer, UserExtensionRequestSerializer, UserReturnRequestSerializer
 from .serializers.admin_serializers import AdminRequestSerializer
 from .serializers.review_serializers import DetailedReviewSerializer
 
@@ -149,6 +149,28 @@ class UserExtensionRequestView(CreateAPIView):
             user=self.request.user,
             status='pending',
             type='extension'
+        )
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserReturnRequestView(CreateAPIView):
+    serializer_class = UserReturnRequestSerializer
+
+    def perform_create(self, serializer):
+        book_id = self.kwargs.get('pk')
+        book = get_object_or_404(Book, pk=book_id)
+        serializer.save(
+            book=book,
+            user=self.request.user,
+            status='pending',
+            type='return'
         )
 
     def create(self, request, *args, **kwargs):

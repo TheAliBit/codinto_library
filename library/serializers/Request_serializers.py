@@ -76,7 +76,9 @@ class UserBorrowRequestSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         book = self.context['view'].kwargs.get('pk')
 
-        if BorrowRequest.objects.filter(user=user, book_id=book, status='pending').exists():
+        if BorrowRequest.objects.filter(user=user, book_id=book, status='accepted').exists():
+            raise serializers.ValidationError("!این کتاب را شما در حال حاظر در اختیار دارید")
+        elif BorrowRequest.objects.filter(user=user, book_id=book, status='pending').exists():
             raise serializers.ValidationError("!شما یک درخواست درحال بررسی دارید")
         return data
 
@@ -121,9 +123,30 @@ class UserExtensionRequestSerializer(serializers.ModelSerializer):
         book = self.context['view'].kwargs.get('pk')
 
         if not BorrowRequest.objects.filter(user=user, book_id=book, status='accepted').exists():
-            raise serializers.ValidationError("!شما در حال حاظر درخواست امانت در جریانی ندارید")
+            raise serializers.ValidationError("!شما درحال حاظر درخواست امانت درجریانی ندارید")
 
         elif ExtensionRequest.objects.filter(user=user, book_id=book, status='pending').exists():
             raise serializers.ValidationError("!شما یک درخواست درحال بررسی دارید")
 
+        return data
+
+
+class UserReturnRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReturnRequest
+        fields = [
+            'id', 'status', 'type'
+        ]
+        read_only_fields = ['status', 'type']
+
+    def validate(self, data):
+        user = self.context['request'].user
+        book = self.context['view'].kwargs.get('pk')
+
+        if not BorrowRequest.objects.filter(user=user, book_id=book, status='accepted').exists():
+            raise serializers.ValidationError("!شما نمیتوانید کتابی که به امانت نبردید را تحویل دهید")
+        elif ReturnRequest.objects.filter(user=user, book_id=book, status='pending').exists():
+            raise serializers.ValidationError("!شما یک درخواست تحویل در جریان دارید")
+        elif ReturnRequest.objects.filter(user=user, book_id=book, status='accpeted').exists():
+            raise serializers.ValidationError("! شما یکبار این کتاب را تحویل دادید")
         return data
