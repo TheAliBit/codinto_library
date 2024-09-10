@@ -122,6 +122,10 @@ class BorrowRequest(BaseRequestModel):
         verbose_name = "درخواست امانت"
         verbose_name_plural = "درخواست‌های امانت"
 
+    def calculate_duration(self, request):
+        self.duration = self.time
+        self.save()
+
 
 class ExtensionRequest(BaseRequestModel):
     TIME_CHOICES = [

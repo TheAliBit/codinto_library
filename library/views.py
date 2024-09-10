@@ -1,4 +1,7 @@
 from itertools import chain
+
+from django.template.context_processors import request
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import DestroyAPIView, UpdateAPIView, RetrieveAPIView, CreateAPIView, \
     get_object_or_404, ListAPIView
@@ -196,6 +199,25 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
 
     def get_queryset(self):
         return BaseRequestModel.objects.all()
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        if instance.status == 'accepted':
+            self.calculate_duration(instance)
+
+    def calculate_duration(self, request):
+        if request.type == 'borrow':
+            book = Book.objects.filter(id=request.book_id).first()
+            if book.count > 0:
+                borrow_request = BorrowRequest.objects.get(id=request.id)
+                borrow_request.calculate_duration(self.request)
+                book.count -= 1
+                book.save()
+            else:
+                raise ValidationError("! نسخه ای از این کتاب در دسترس نیست")
+        # elif request.type == 'extension':
+        #     extension_request = ExtensionRequest.objects.get(id=request.id)
+        #     extension_request.calculate_duration()
 
 
 class AdminBookView(ListAPIView, CreateAPIView):
