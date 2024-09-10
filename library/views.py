@@ -1,6 +1,10 @@
 from itertools import chain
 
-from django.template.context_processors import request
+from django.db.models import Count, Q
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import generics
+from rest_framework import status
+from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import DestroyAPIView, UpdateAPIView, RetrieveAPIView, CreateAPIView, \
@@ -8,19 +12,13 @@ from rest_framework.generics import DestroyAPIView, UpdateAPIView, RetrieveAPIVi
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics
-from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
-from rest_framework import viewsets
-from django_filters.rest_framework import DjangoFilterBackend
-from .models import Book, Category, Review, BorrowRequest, ExtensionRequest, BaseRequestModel
-from library.serializers.home_page_serializers import BookSerializer, BookSerializerForAdmin, BookListSerializerForAdmin
-from library.serializers.category_serializers import CategorySerializer
-from library.serializers.book_serializers import FullBookSerializer
+
 from library.filters import CustomBookFilterSet
-
-from django.db.models import Count, Q
-
+from library.serializers.book_serializers import FullBookSerializer
+from library.serializers.category_serializers import CategorySerializer
+from library.serializers.home_page_serializers import BookSerializer, BookSerializerForAdmin, BookListSerializerForAdmin
+from .models import Book, Category, Review, BorrowRequest, ExtensionRequest, BaseRequestModel
 from .serializers.Request_serializers import UserRequestSerializer, \
     UserBorrowRequestSerializer, UserExtensionRequestSerializer, UserReturnRequestSerializer, BaseRequestSerializer
 from .serializers.admin_serializers import AdminRequestSerializer
@@ -201,8 +199,12 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
         return BaseRequestModel.objects.all()
 
     def perform_update(self, serializer):
+        instance = self.get_object()
+        old_status = instance.status
         instance = serializer.save()
-        if instance.status == 'accepted':
+        new_status = instance.status
+
+        if not (new_status == 'accepted' and old_status == 'accepted'):
             self.calculate_duration(instance)
 
     def calculate_duration(self, request):
