@@ -204,8 +204,9 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
         instance = serializer.save()
         new_status = instance.status
 
-        if not (new_status == 'accepted' and old_status == 'accepted'):
-            self.calculate_duration(instance)
+        if not old_status == 'accepted':
+            if new_status == 'accepted':
+                self.calculate_duration(instance)
 
     def calculate_duration(self, request):
         if request.type == 'borrow':
@@ -217,9 +218,9 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
                 book.save()
             else:
                 raise ValidationError("! نسخه ای از این کتاب در دسترس نیست")
-        # elif request.type == 'extension':
-        #     extension_request = ExtensionRequest.objects.get(id=request.id)
-        #     extension_request.calculate_duration()
+    # elif request.type == 'extension':
+    #     extension_request = ExtensionRequest.objects.get(id=request.id)
+    #     extension_request.calculate_duration()
 
 
 class AdminBookView(ListAPIView, CreateAPIView):
