@@ -1,6 +1,7 @@
 from itertools import chain
 
 from django.db.models import Count, Q
+from django.template.context_processors import request
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
 from rest_framework import status
@@ -18,10 +19,11 @@ from library.filters import CustomBookFilterSet
 from library.serializers.book_serializers import FullBookSerializer
 from library.serializers.category_serializers import CategorySerializer
 from library.serializers.home_page_serializers import BookSerializer, BookSerializerForAdmin, BookListSerializerForAdmin
-from .models import Book, Category, Review, BorrowRequest, ExtensionRequest, BaseRequestModel
+from .models import Book, Category, Review, BorrowRequest, ExtensionRequest, BaseRequestModel, Notification
 from .serializers.Request_serializers import UserRequestSerializer, \
     UserBorrowRequestSerializer, UserExtensionRequestSerializer, UserReturnRequestSerializer, BaseRequestSerializer
 from .serializers.admin_serializers import AdminRequestSerializer
+from .serializers.notif_serializerss import UserNotificationSerializer
 from .serializers.review_serializers import DetailedReviewSerializer
 
 
@@ -249,3 +251,11 @@ class UserMyBookView(ListAPIView):
 
     def get_queryset(self):
         return BaseRequestModel.objects.filter(user=self.request.user, status='accepted', type='borrow')
+
+
+class UserNotificationList(ListAPIView):
+    serializer_class = UserNotificationSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return Notification.objects.filter(user=user)
