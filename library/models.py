@@ -139,6 +139,12 @@ class ExtensionRequest(BaseRequestModel):
         verbose_name = "درخواست تمدید"
         verbose_name_plural = "درخواست‌های تمدید"
 
+    def extend_duration(self, request):
+        if self.duration is None:
+            self.duration = 0
+        self.duration += self.time
+        self.save()
+
 
 class ReviewRequest(BaseRequestModel):
     text = models.TextField(max_length=1000, null=True)

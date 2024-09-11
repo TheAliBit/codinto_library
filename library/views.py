@@ -201,26 +201,31 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
     def perform_update(self, serializer):
         instance = self.get_object()
         old_status = instance.status
-        instance = serializer.save()
-        new_status = instance.status
+        new_instance = serializer.save()
+        new_status = new_instance.status
 
-        if not old_status == 'accepted':
-            if new_status == 'accepted':
-                self.calculate_duration(instance)
+        if old_status != 'accepted' and new_status == 'accepted':
+            self.calculate_duration(new_instance)
+        elif old_status == 'accepted' and new_status == 'accepted' or new_status == 'rejected':
+            raise ValidationError(
+                "! شما یک بار وضعیت در خواست را رد و یا تایید کردید و دیگر این امکان برای شما فراهم نیست")
 
     def calculate_duration(self, request):
         if request.type == 'borrow':
+            # Check if the book is available
             book = Book.objects.filter(id=request.book_id).first()
-            if book.count > 0:
+            if book and book.count > 0:
+                # Calculate borrow duration and reduce book count
                 borrow_request = BorrowRequest.objects.get(id=request.id)
                 borrow_request.calculate_duration(self.request)
                 book.count -= 1
                 book.save()
             else:
-                raise ValidationError("! نسخه ای از این کتاب در دسترس نیست")
-    # elif request.type == 'extension':
-    #     extension_request = ExtensionRequest.objects.get(id=request.id)
-    #     extension_request.calculate_duration()
+                raise ValidationError("! نسخه ای از این کتاب در حال حاظر موجود نمی باشد")
+        elif request.type == 'extension':
+            # Handle extension request logic
+            extension_request = ExtensionRequest.objects.get(id=request.id)
+            extension_request.extend_duration(self.request)
 
 
 class AdminBookView(ListAPIView, CreateAPIView):
