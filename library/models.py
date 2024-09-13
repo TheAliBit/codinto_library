@@ -126,6 +126,10 @@ class BorrowRequest(BaseRequestModel):
         self.duration = self.time
         self.save()
 
+    def reset_duration(self):
+        self.duration = 0
+        self.save()
+
 
 class ExtensionRequest(BaseRequestModel):
     TIME_CHOICES = [
@@ -140,9 +144,11 @@ class ExtensionRequest(BaseRequestModel):
         verbose_name_plural = "درخواست‌های تمدید"
 
     def extend_duration(self, request):
-        if self.duration is None:
-            self.duration = 0
-        self.duration += self.time
+        self.duration = self.time
+        self.save()
+
+    def reset_duration(self):
+        self.duration = 0
         self.save()
 
 
