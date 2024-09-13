@@ -1,5 +1,7 @@
 from django.db.models import Q, Count
 from django_filters import rest_framework as filters
+from rest_framework.filters import BaseFilterBackend
+
 from library.models import Book, Review
 
 
@@ -35,3 +37,11 @@ class CustomReviewFilterSet(filters.FilterSet):
     class Meta:
         model = Review
         fields = ['start_date', 'end_date']
+
+
+# class CustomAdminNotifFilter(BaseFilterBackend):
+#     def filter_queryset(self, request, queryset, view):
+#         if request.user.is_superuser:
+#             return queryset.filter(user=request.user, user__is_superuser=True)
+#         else:
+#             return queryset
