@@ -1,7 +1,7 @@
 from itertools import chain
 
 from django.db.models import Count, Q
-from django.template.context_processors import request
+
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
 from rest_framework import status
@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from library.filters import CustomBookFilterSet
+from library.filters import CustomBookFilterSet, CustomAdminNotifFilter
 from library.serializers.book_serializers import FullBookSerializer
 from library.serializers.category_serializers import CategorySerializer
 from library.serializers.home_page_serializers import BookSerializer, BookSerializerForAdmin, BookListSerializerForAdmin
@@ -229,6 +229,13 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
             extension_request = ExtensionRequest.objects.get(id=request.id)
             extension_request.extend_duration(self.request)
 
+        # # for reseting the duration to its default when the user return the book
+        # elif request.type == 'return':
+        #     borrow_request = BorrowRequest.objects.get(id=request.id)
+        #     extension_request = ExtensionRequest.objects.get(id=request.id)
+        #     borrow_request.reset_duration(self.request)
+        #     extension_request.reset_duration(self.request)
+
 
 class AdminBookView(ListAPIView, CreateAPIView):
     serializer_class = BookListSerializerForAdmin
@@ -255,6 +262,9 @@ class UserMyBookView(ListAPIView):
 
 class UserNotificationList(ListAPIView):
     serializer_class = UserNotificationSerializer
+
+    # filter_backends = [CustomAdminNotifFilter]
+    # filter_class  = [CustomAdminNotifFilter]
 
     def get_queryset(self):
         user = self.request.user
