@@ -134,6 +134,9 @@ class UserExtensionRequestSerializer(serializers.ModelSerializer):
         elif ExtensionRequest.objects.filter(user=user, book_id=book, status='pending').exists():
             raise serializers.ValidationError("!شما یک درخواست درحال بررسی دارید")
 
+        elif ExtensionRequest.objects.filter(user=user, book_id=book, status='accepted').exists():
+            raise serializers.ValidationError("! ارسال درخواست تمدید بیشتر از یک بار مجاز نیست")
+
         return data
 
 
