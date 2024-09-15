@@ -22,7 +22,7 @@ from library.serializers.home_page_serializers import BookSerializer, BookSerial
 from .models import Book, Category, Review, BorrowRequest, ExtensionRequest, BaseRequestModel, Notification
 from .serializers.Request_serializers import UserRequestSerializer, \
     UserBorrowRequestSerializer, UserExtensionRequestSerializer, UserReturnRequestSerializer, BaseRequestSerializer
-from .serializers.admin_serializers import AdminRequestSerializer
+from .serializers.admin_serializers import AdminRequestSerializer, AdminNotificationSerializer
 from .serializers.notif_serializerss import UserNotificationSerializer
 from .serializers.review_serializers import DetailedReviewSerializer
 
@@ -266,3 +266,11 @@ class UserNotificationList(ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return Notification.objects.filter(user=user)
+
+
+
+class AdminNotificationView(ListAPIView, CreateAPIView):
+    serializer_class = AdminNotificationSerializer
+
+    def get_queryset(self):
+        return Notification.objects.all()
