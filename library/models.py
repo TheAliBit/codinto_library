@@ -76,10 +76,11 @@ class Notification(BaseModel, models.Model):
     image = models.ImageField(upload_to='uploads/', verbose_name="تصویر اطلاع‌رسانی")
 
     TYPE_CHOICES = [
-        ('sms', 'Need to send SMS'),
-        ('no_sms', "Don't need to send SMS"),
+        ('public', 'no sms'),
+        ('request', 'sms'),
+        ('availabel', 'sms'),
     ]
-    type = models.CharField(max_length=7, choices=TYPE_CHOICES, default='no_sms', verbose_name="نوع اطلاع‌رسانی")
+    type = models.CharField(max_length=255, choices=TYPE_CHOICES, default='no_sms', verbose_name="نوع اطلاع‌رسانی")
 
     class Meta:
         verbose_name = "اطلاع‌رسانی"
