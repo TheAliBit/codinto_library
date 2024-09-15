@@ -210,7 +210,7 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
             self.handle_borrow_request(request)
         elif request.type == 'extension':
             self.handle_extension_request(request)
-        # Uncomment and implement if you plan to handle returns
+
         # elif request.type == 'return':
         #     self.handle_return_request(request)
 
@@ -228,7 +228,6 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
         extension_request = ExtensionRequest.objects.get(id=request.id)
         extension_request.extend_duration(self.request)
 
-    # Uncomment if handling book return
     # def handle_return_request(self, request):
     #     borrow_request = BorrowRequest.objects.get(id=request.id)
     #     extension_request = ExtensionRequest.objects.get(id=request.id)

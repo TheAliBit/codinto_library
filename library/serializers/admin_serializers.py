@@ -19,15 +19,17 @@ class AdminRequestSerializer(serializers.ModelSerializer):
         ]
 
     def get_request_detail(self, obj):
-        SERIALIZER_CHOICES = {
-            'borrow': BorrowRequestSerializer,
-            'extension': ExtensionRequestSerializer,
-            'review': SimpleReviewSerializer,
-            'return': ViewReturnRequestSerializer
-        }
-        request_type = obj.type
-        serializer_class = SERIALIZER_CHOICES.get(request_type)
-        serializer = serializer_class(obj)
+        if obj.type == 'borrow':
+            serializer = BorrowRequestSerializer(obj.borrowrequest)
+        elif obj.type == 'extension':
+            serializer = ExtensionRequestSerializer(obj.extensionrequest)
+        elif obj.type == 'review':
+            serializer = SimpleReviewSerializer(obj)
+        elif obj.type == 'return':
+            serializer = ViewReturnRequestSerializer(obj.returnrequest)
+        else:
+            return None
+
         return serializer.data
 
     def validate_status(self, value):

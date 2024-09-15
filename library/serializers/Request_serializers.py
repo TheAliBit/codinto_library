@@ -12,12 +12,17 @@ class BookDetailForBorrowRequestSerializer(serializers.ModelSerializer):
 
 class BorrowRequestSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
+    start_date = serializers.SerializerMethodField()
 
     class Meta:
         model = BorrowRequest
         fields = [
             'type', 'id', 'duration', 'status', 'start_date'
         ]
+
+    def get_start_date(self, obj):
+        print(obj.start_date, 'start date')
+        return obj.start_date
 
     def get_type(self, obj):
         return "borrow_request"

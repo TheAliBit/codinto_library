@@ -128,7 +128,7 @@ class BorrowRequest(BaseRequestModel):
     def calculate_duration(self, request):
         self.duration = self.time
         self.start_date = timezone.now()
-        self.save()
+        self.save(update_fields=['start_date', 'duration'])
 
     def reset_duration(self):
         self.duration = 0
