@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from library.filters import CustomBookFilterSet, CustomAdminNotifFilter
+from library.filters import CustomBookFilterSet
 from library.serializers.book_serializers import FullBookSerializer
 from library.serializers.category_serializers import CategorySerializer
 from library.serializers.home_page_serializers import BookSerializer, BookSerializerForAdmin, BookListSerializerForAdmin
@@ -203,21 +203,20 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
     def perform_update(self, serializer):
         instance = self.get_object()
         old_status = instance.status
-        new_instance = serializer.save()
-        new_status = new_instance.status
+        new_status = serializer.validated_data.get('status')
 
         if old_status != 'accepted' and new_status == 'accepted':
-            self.calculate_duration(new_instance)
-        elif old_status == 'accepted' and new_status == 'accepted' or new_status == 'rejected':
+            self.calculate_duration(instance)
+        elif old_status == 'accepted' and new_status in ['accepted', 'pending', 'rejected']:
             raise ValidationError(
                 "! شما یک بار وضعیت در خواست را رد و یا تایید کردید و دیگر این امکان برای شما فراهم نیست")
 
+        serializer.save()
+
     def calculate_duration(self, request):
         if request.type == 'borrow':
-            # Check if the book is available
             book = Book.objects.filter(id=request.book_id).first()
             if book and book.count > 0:
-                # Calculate borrow duration and reduce book count
                 borrow_request = BorrowRequest.objects.get(id=request.id)
                 borrow_request.calculate_duration(self.request)
                 book.count -= 1
@@ -225,7 +224,6 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
             else:
                 raise ValidationError("! نسخه ای از این کتاب در حال حاظر موجود نمی باشد")
         elif request.type == 'extension':
-            # Handle extension request logic
             extension_request = ExtensionRequest.objects.get(id=request.id)
             extension_request.extend_duration(self.request)
 

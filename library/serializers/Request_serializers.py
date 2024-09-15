@@ -16,7 +16,7 @@ class BorrowRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = BorrowRequest
         fields = [
-            'type', 'id', 'duration', 'status'
+            'type', 'id', 'duration', 'status', 'updated_at'
         ]
 
     def get_type(self, obj):
