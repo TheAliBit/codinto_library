@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from library.filters import CustomBookFilterSet
+from library.filters import CustomBookFilterSet, CustomPublicNotificationsFilter
 from library.serializers.book_serializers import FullBookSerializer
 from library.serializers.category_serializers import CategorySerializer
 from library.serializers.home_page_serializers import BookSerializer, BookSerializerForAdmin, BookListSerializerForAdmin
@@ -260,9 +260,8 @@ class UserMyBookView(ListAPIView):
 
 class UserNotificationList(ListAPIView):
     serializer_class = UserNotificationSerializer
-
-    # filter_backends = [CustomAdminNotifFilter]
-    # filter_class  = [CustomAdminNotifFilter]
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = CustomPublicNotificationsFilter
 
     def get_queryset(self):
         user = self.request.user

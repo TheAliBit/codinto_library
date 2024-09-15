@@ -1,8 +1,7 @@
 from django.db.models import Q, Count
 from django_filters import rest_framework as filters
-from rest_framework.filters import BaseFilterBackend
 
-from library.models import Book, Review
+from library.models import Book, Review, Notification
 
 
 class CustomBookFilterSet(filters.FilterSet):
@@ -39,9 +38,14 @@ class CustomReviewFilterSet(filters.FilterSet):
         fields = ['start_date', 'end_date']
 
 
-# class CustomAdminNotifFilter(BaseFilterBackend):
-#     def filter_queryset(self, request, queryset, view):
-#         if request.user.is_superuser:
-#             return queryset.filter(user=request.user, user__is_superuser=True)
-#         else:
-#             return queryset
+class CustomPublicNotificationsFilter(filters.FilterSet):
+    is_superuser = filters.BooleanFilter(method='filter_is_superuser', label='اطلاع رسانی عمومی')
+
+    class Meta:
+        model = Notification
+        fields = []
+
+    def filter_is_superuser(self, queryset, name, value):
+        if value:
+            return queryset.filter(user__is_superuser=True)
+        return queryset
