@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from library.models import BaseRequestModel
-from library.serializers.book_serializers import FullBookSerializer
+from library.models import BaseRequestModel, Notification
+from library.serializers.book_serializers import FullBookSerializer, SimpleBookSerializer
 from library.serializers.review_serializers import SimpleReviewSerializer
-from library.serializers.user_serializers import FullUserSerializer
+from library.serializers.user_serializers import FullUserSerializer, SimpleUserSerializer
 from library.serializers.Request_serializers import BorrowRequestSerializer, ExtensionRequestSerializer, \
     ViewReturnRequestSerializer
 
@@ -43,3 +43,12 @@ class AdminRequestSerializer(serializers.ModelSerializer):
         if request_type == 'return' and value not in valid_status:
             raise serializers.ValidationError("!وضعیت برای درخواست تحویل امکان رد شدن ندارد")
         return value
+
+
+class AdminNotificationSerializer(serializers.ModelSerializer):
+    user = SimpleUserSerializer(read_only=True)
+    book = SimpleBookSerializer(read_only=True)
+
+    class Meta:
+        model = Notification
+        fields = ['user', 'book', 'title', 'description', 'image', 'type']
