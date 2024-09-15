@@ -1,4 +1,6 @@
 from django.db import models
+from django.utils import timezone
+
 from core.models import BaseModel
 from core.models import Profile
 
@@ -117,6 +119,7 @@ class BorrowRequest(BaseRequestModel):
         (30, '30 Days'),
     ]
     time = models.IntegerField(choices=TIME_CHOICES, verbose_name="مدت زمان امانت")
+    start_date = models.DateTimeField(null=True, blank=True, verbose_name='تاریخ شروع امانت')
 
     class Meta:
         verbose_name = "درخواست امانت"
@@ -124,6 +127,7 @@ class BorrowRequest(BaseRequestModel):
 
     def calculate_duration(self, request):
         self.duration = self.time
+        self.start_date = timezone.now()
         self.save()
 
     def reset_duration(self):
