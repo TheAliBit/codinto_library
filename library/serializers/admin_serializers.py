@@ -33,6 +33,11 @@ class AdminRequestSerializer(serializers.ModelSerializer):
     def validate_status(self, value):
         valid_status = ['accepted', 'pending']
         request_type = self.instance.type if self.instance else self.initial_data.get('type')
+
+        if self.instance.status != 'pending':
+            raise serializers.ValidationError(
+                '! شما یک بار وضعیت در خواست را رد و یا تایید کردید و دیگر این امکان برای شما فراهم نیست')
+
         if request_type == 'return' and value not in valid_status:
             raise serializers.ValidationError("!وضعیت برای درخواست تحویل امکان رد شدن ندارد")
         return value

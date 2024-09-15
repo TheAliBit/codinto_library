@@ -201,38 +201,39 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
         return BaseRequestModel.objects.all()
 
     def perform_update(self, serializer):
-        instance = self.get_object()
-        old_status = instance.status
-        new_status = serializer.validated_data.get('status')
+        instance = serializer.save()
+        if instance.status == 'accepted':
+            self.handle_request(instance)
 
-        if old_status != 'accepted' and new_status == 'accepted':
-            self.calculate_duration(instance)
-        elif old_status == 'accepted' and new_status in ['accepted', 'pending', 'rejected']:
-            raise ValidationError(
-                "! شما یک بار وضعیت در خواست را رد و یا تایید کردید و دیگر این امکان برای شما فراهم نیست")
-
-        serializer.save()
-
-    def calculate_duration(self, request):
+    def handle_request(self, request):
         if request.type == 'borrow':
-            book = Book.objects.filter(id=request.book_id).first()
-            if book and book.count > 0:
-                borrow_request = BorrowRequest.objects.get(id=request.id)
-                borrow_request.calculate_duration(self.request)
-                book.count -= 1
-                book.save()
-            else:
-                raise ValidationError("! نسخه ای از این کتاب در حال حاظر موجود نمی باشد")
+            self.handle_borrow_request(request)
         elif request.type == 'extension':
-            extension_request = ExtensionRequest.objects.get(id=request.id)
-            extension_request.extend_duration(self.request)
-
-        # # for reseting the duration to its default when the user return the book
+            self.handle_extension_request(request)
+        # Uncomment and implement if you plan to handle returns
         # elif request.type == 'return':
-        #     borrow_request = BorrowRequest.objects.get(id=request.id)
-        #     extension_request = ExtensionRequest.objects.get(id=request.id)
-        #     borrow_request.reset_duration(self.request)
-        #     extension_request.reset_duration(self.request)
+        #     self.handle_return_request(request)
+
+    def handle_borrow_request(self, request):
+        book = Book.objects.filter(id=request.book_id).first()
+        if book and book.count > 0:
+            borrow_request = BorrowRequest.objects.get(id=request.id)
+            borrow_request.calculate_duration(self.request)
+            book.count -= 1
+            book.save()
+        else:
+            raise ValidationError("نسخه ای از این کتاب در حال حاظر موجود نمی باشد")
+
+    def handle_extension_request(self, request):
+        extension_request = ExtensionRequest.objects.get(id=request.id)
+        extension_request.extend_duration(self.request)
+
+    # Uncomment if handling book return
+    # def handle_return_request(self, request):
+    #     borrow_request = BorrowRequest.objects.get(id=request.id)
+    #     extension_request = ExtensionRequest.objects.get(id=request.id)
+    #     borrow_request.reset_duration(self.request)
+    #     extension_request.reset_duration(self.request)
 
 
 class AdminBookView(ListAPIView, CreateAPIView):
