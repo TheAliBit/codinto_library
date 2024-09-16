@@ -26,13 +26,6 @@ class DetailedReviewSerializer(serializers.ModelSerializer):
             raise ValidationError("! متن نظر نمیتواند خالی باشد")
         return value
 
-    def update(self, instance, validated_data):
-        if validated_data['description'] == instance.description and validated_data['score'] == instance.score:
-            return instance
-        else:
-            validated_data['state'] = 'pending'
-            return super().update(instance, validated_data)
-
 
 class SimpleReviewSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
