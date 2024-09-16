@@ -1,7 +1,6 @@
 from itertools import chain
 
 from django.db.models import Count, Q
-from django.utils.datetime_safe import datetime
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
@@ -87,26 +86,27 @@ class SearchListAPIView(ListAPIView):
     search_fields = ['title']
 
 
-class UserReviewListView(ListAPIView):
+class UserReviewListView(generics.ListAPIView):
     serializer_class = DetailedReviewSerializer
-
-    # filterset_class = CustomReviewFilterSet
 
     def get_queryset(self):
         user = self.request.user
         queryset = ReviewRequest.objects.filter(user=user)
         return queryset.order_by('-created_at')
 
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
 
-
-class UserReveiwDetailView(generics.RetrieveAPIView, DestroyAPIView, UpdateAPIView):
+class UserReviewDetailView(generics.RetrieveAPIView, generics.DestroyAPIView, generics.UpdateAPIView):
     serializer_class = DetailedReviewSerializer
 
     def get_queryset(self):
         user = self.request.user
         return ReviewRequest.objects.filter(user=user)
+
+    def perform_update(self, serializer):
+        serializer.save(
+            status='pending',
+            type='review',
+        )
 
 
 class RequestsListView(generics.ListAPIView):

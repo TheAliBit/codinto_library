@@ -2,7 +2,7 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from library.views import CategoryViewSet, HomePageAPIView, BookViewSet, SearchListAPIView, UserReviewListView, \
-        UserReveiwDetailView, DetailedBookView, RequestsListView, UserBorrowRequestView, AdminRequestView, \
+        UserReviewDetailView, DetailedBookView, RequestsListView, UserBorrowRequestView, AdminRequestView, \
         AdminSingleRequestView, AdminBookView, AdminSingleBookView, UserExtensionRequestView, UserReturnRequestView, \
         UserMyBookView, UserNotificationList, AdminNotificationView, UserReviewView
 
@@ -14,7 +14,7 @@ urlpatterns = [
         path('user/category/', CategoryViewSet.as_view({'get': 'list', 'post': 'create'}),
         name='category-list'),
         path('user/reviews/', UserReviewListView.as_view(), name='review-detail'),
-        path('user/reviews/<int:pk>/', UserReveiwDetailView.as_view(), name='review-detail'),
+        path('user/reviews/<int:pk>/', UserReviewDetailView.as_view(), name='review-detail'),
         path('user/books/', BookViewSet.as_view({'get': 'list'}), name='book-list'),
         path('user/books/<int:pk>/', DetailedBookView.as_view(), name='book-detail'),
         path('user/books/<int:pk>/borrow/', UserBorrowRequestView.as_view(), name='user-borrow-request'),

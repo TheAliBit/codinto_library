@@ -11,12 +11,20 @@ class DetailedReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReviewRequest
         fields = ['id', 'score', 'description', 'status', 'book']
+        read_only_fields = ['status']
 
     def validate_score(self, value):
+        if value == None:
+            raise ValidationError('! فیلد امتیاز نمیتواند خالی باشد')
         if value < 0 or value > 5:
             raise serializers.ValidationError("!امتیاز باید بین 0 تا 5 باشد")
         else:
             return value
+
+    def validate_description(self, value):
+        if value == None:
+            raise ValidationError("! متن نظر نمیتواند خالی باشد")
+        return value
 
     def update(self, instance, validated_data):
         if validated_data['description'] == instance.description and validated_data['score'] == instance.score:
