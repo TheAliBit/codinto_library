@@ -103,10 +103,16 @@ class UserReviewDetailView(generics.RetrieveAPIView, generics.DestroyAPIView, ge
         return ReviewRequest.objects.filter(user=user)
 
     def perform_update(self, serializer):
-        serializer.save(
+        review = get_object_or_404(ReviewRequest, pk=self.kwargs.get('pk'))
+        ReviewRequest.objects.create(
+            user=self.request.user,
+            book=review.book,
+            description=serializer.validated_data.get('description'),
+            score=serializer.validated_data.get('score'),
             status='pending',
-            type='review',
+            type='review'
         )
+        review.delete()
 
 
 class RequestsListView(generics.ListAPIView):
