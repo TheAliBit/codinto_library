@@ -19,7 +19,7 @@ from library.filters import CustomBookFilterSet, CustomPublicNotificationsFilter
 from library.serializers.book_serializers import FullBookSerializer
 from library.serializers.category_serializers import CategorySerializer
 from library.serializers.home_page_serializers import BookSerializer, BookSerializerForAdmin, \
-    BookListSerializerForAdmin
+    BookListSerializerForAdmin, BookAvailableRemainderSerializer
 from .models import Book, Category, ReviewRequest, BorrowRequest, ExtensionRequest, BaseRequestModel, Notification
 from .serializers.Request_serializers import UserRequestSerializer, \
     UserBorrowRequestSerializer, UserExtensionRequestSerializer, UserReturnRequestSerializer, BaseRequestSerializer
@@ -297,6 +297,26 @@ class UserReviewView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
 
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AvailableRemainderView(CreateAPIView):
+    serializer_class = BookAvailableRemainderSerializer
+
+    def perform_create(self, serializer):
+        book_id = self.kwargs.get('pk')
+        book = get_object_or_404(Book, pk=book_id)
+        serializer.save(
+            book=book,
+            user=self.request.user,
+            type='available',
+        )
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)

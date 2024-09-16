@@ -78,7 +78,7 @@ class Notification(BaseModel, models.Model):
     TYPE_CHOICES = [
         ('public', 'no sms'),
         ('request', 'sms'),
-        ('availabel', 'sms'),
+        ('available', 'sms'),
     ]
     type = models.CharField(max_length=255, choices=TYPE_CHOICES, default='no_sms', verbose_name="نوع اطلاع‌رسانی")
 
@@ -87,7 +87,10 @@ class Notification(BaseModel, models.Model):
         verbose_name_plural = "اطلاع‌رسانی‌ها"
 
     def __str__(self):
-        return self.title
+        user = self.user
+        book = self.book
+        type = self.type
+        return f"({user}) CREATED ({type}) NOTIFICATIONS ON ({book})"
 
 
 class BaseRequestModel(BaseModel):

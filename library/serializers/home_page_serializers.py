@@ -1,9 +1,11 @@
-
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from codinto_library import settings
-from library.models import Book, ReviewRequest
+from core.urls import urlpatterns
+from library.models import Book, ReviewRequest, Notification
+from library.serializers.book_serializers import FullBookSerializer
+from library.serializers.user_serializers import FullUserSerializer
 
 
 class BookSerializer(serializers.ModelSerializer):
@@ -70,3 +72,14 @@ class BookSerializerForAdmin(serializers.ModelSerializer):
         return value
 
 
+class BookAvailableRemainderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = []
+
+    def validate(self, attrs):
+        user = self.context['request'].user
+        book = self.context['view'].kwargs.get('pk')
+        if Notification.objects.filter(user=user, book=book).exists():
+            raise ValidationError('! شما یکبار درخواست موجود شد به من اطلاع بدید رو انتخاب کردید')
+        return attrs
