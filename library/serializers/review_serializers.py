@@ -10,7 +10,7 @@ class DetailedReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ReviewRequest
-        fields = ['id', 'score', 'description', 'book']
+        fields = ['id', 'score', 'description', 'status', 'book']
 
     def validate_score(self, value):
         if value < 0 or value > 5:
