@@ -1,10 +1,8 @@
-from multiprocessing.managers import public_methods
-
 from rest_framework import serializers
 from library.models import BaseRequestModel, Notification
-from library.serializers.book_serializers import FullBookSerializer, SimpleBookSerializer
+from library.serializers.book_serializers import FullBookSerializer
 from library.serializers.review_serializers import SimpleReviewSerializer
-from library.serializers.user_serializers import FullUserSerializer, SimpleUserSerializer
+from library.serializers.user_serializers import FullUserSerializer
 from library.serializers.Request_serializers import BorrowRequestSerializer, ExtensionRequestSerializer, \
     ViewReturnRequestSerializer
 

@@ -44,26 +44,26 @@ class Book(BaseModel, models.Model):
         return self.title
 
 
-class Review(BaseModel, models.Model):
-    user = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, related_name="reviews",
-                             verbose_name="کاربر")
-    book = models.ForeignKey('Book', on_delete=models.SET_NULL, null=True, related_name="reviews", verbose_name="کتاب")
-    score = models.IntegerField(verbose_name="امتیاز")
-    description = models.TextField(verbose_name="متن نظر")
-
-    STATE_CHOICES = [
-        ('accepted', 'Accepted'),
-        ('pending', 'Pending'),
-        ('rejected', 'Rejected'),
-    ]
-    state = models.CharField(max_length=10, choices=STATE_CHOICES, default='pending', verbose_name="وضعیت")
-
-    class Meta:
-        verbose_name = "نظر"
-        verbose_name_plural = "نظرات"
-
-    def __str__(self):
-        return f"{self.user} - {self.book} ({self.score})"
+# class Review(BaseModel, models.Model):
+#     user = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, related_name="reviews",
+#                              verbose_name="کاربر")
+#     book = models.ForeignKey('Book', on_delete=models.SET_NULL, null=True, related_name="reviews", verbose_name="کتاب")
+#     score = models.IntegerField(verbose_name="امتیاز")
+#     description = models.TextField(verbose_name="متن نظر")
+#
+#     STATE_CHOICES = [
+#         ('accepted', 'Accepted'),
+#         ('pending', 'Pending'),
+#         ('rejected', 'Rejected'),
+#     ]
+#     state = models.CharField(max_length=10, choices=STATE_CHOICES, default='pending', verbose_name="وضعیت")
+#
+#     class Meta:
+#         verbose_name = "نظر"
+#         verbose_name_plural = "نظرات"
+#
+#     def __str__(self):
+#         return f"{self.user} - {self.book} ({self.score})"
 
 
 class Notification(BaseModel, models.Model):
@@ -158,11 +158,15 @@ class ExtensionRequest(BaseRequestModel):
 
 
 class ReviewRequest(BaseRequestModel):
-    text = models.TextField(max_length=1000, null=True)
+    score = models.IntegerField(verbose_name="امتیاز", default=0)
+    description = models.TextField(verbose_name="متن نظر", default='default')
 
     class Meta:
-        verbose_name = "درخواست بررسی"
-        verbose_name_plural = "درخواست‌های بررسی"
+        verbose_name = "نظر"
+        verbose_name_plural = "نظرات"
+
+    def __str__(self):
+        return f"{self.user} - {self.book} ({self.score})"
 
 
 class ReturnRequest(BaseRequestModel):

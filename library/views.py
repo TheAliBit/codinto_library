@@ -18,13 +18,15 @@ from rest_framework.viewsets import ModelViewSet
 from library.filters import CustomBookFilterSet, CustomPublicNotificationsFilter
 from library.serializers.book_serializers import FullBookSerializer
 from library.serializers.category_serializers import CategorySerializer
-from library.serializers.home_page_serializers import BookSerializer, BookSerializerForAdmin, BookListSerializerForAdmin
-from .models import Book, Category, Review, BorrowRequest, ExtensionRequest, BaseRequestModel, Notification
+from library.serializers.home_page_serializers import BookSerializer, BookSerializerForAdmin, \
+    BookListSerializerForAdmin
+from .models import Book, Category, ReviewRequest, BorrowRequest, ExtensionRequest, BaseRequestModel, Notification
 from .serializers.Request_serializers import UserRequestSerializer, \
     UserBorrowRequestSerializer, UserExtensionRequestSerializer, UserReturnRequestSerializer, BaseRequestSerializer
 from .serializers.admin_serializers import AdminRequestSerializer, AdminNotificationSerializer
 from .serializers.notif_serializerss import UserNotificationSerializer
 from .serializers.review_serializers import DetailedReviewSerializer
+from .serializers.user_serializers import UserCreateReviewSerializer
 
 
 class CategoryViewSet(ModelViewSet):
@@ -91,7 +93,7 @@ class UserReviewListView(ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        queryset = Review.objects.filter(user=user)
+        queryset = ReviewRequest.objects.filter(user=user)
         return queryset.order_by('-created_at')
 
     def get(self, request, *args, **kwargs):
@@ -103,7 +105,7 @@ class UserReveiwDetailView(generics.RetrieveAPIView, DestroyAPIView, UpdateAPIVi
 
     def get_queryset(self):
         user = self.request.user
-        return Review.objects.filter(user=user)
+        return ReviewRequest.objects.filter(user=user)
 
 
 class RequestsListView(generics.ListAPIView):
@@ -113,7 +115,7 @@ class RequestsListView(generics.ListAPIView):
         user = self.request.user
         borrow_requests = BorrowRequest.objects.filter(user=user)
         extension_requests = ExtensionRequest.objects.filter(user=user)
-        review_requests = Review.objects.filter(user=user)
+        review_requests = ReviewRequest.objects.filter(user=user)
         combined_queryset = list(chain(borrow_requests, extension_requests, review_requests))
         combined_queryset.sort(key=lambda x: x.created_at, reverse=True)
         return combined_queryset
@@ -268,9 +270,43 @@ class UserNotificationList(ListAPIView):
         return Notification.objects.filter(user=user)
 
 
-
 class AdminNotificationView(ListAPIView, CreateAPIView):
     serializer_class = AdminNotificationSerializer
 
     def get_queryset(self):
         return Notification.objects.all()
+
+
+class UserReviewView(RetrieveAPIView, CreateAPIView):
+    serializer_class = UserCreateReviewSerializer
+    def perform_create(self, serializer):
+        book_id = self.kwargs.get('pk')
+        book = get_object_or_404(Book, pk=book_id)
+        serializer.save(
+            book=book,
+            user=self.request.user,
+            status='pending',
+            type='review'
+        )
+
+
+    class UserExtensionRequestView(CreateAPIView):
+        serializer_class = UserExtensionRequestSerializer
+
+        def perform_create(self, serializer):
+            book_id = self.kwargs.get('pk')
+            book = get_object_or_404(Book, pk=book_id)
+            serializer.save(
+                book=book,
+                user=self.request.user,
+                status='pending',
+                type='extension'
+            )
+
+        def create(self, request, *args, **kwargs):
+            serializer = self.get_serializer(data=request.data)
+
+            if serializer.is_valid():
+                self.perform_create(serializer)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

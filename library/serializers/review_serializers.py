@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from library.models import Review
+from library.models import ReviewRequest
 from library.serializers.book_serializers import SimpleBookSerializer
 
 
@@ -8,9 +8,8 @@ class DetailedReviewSerializer(serializers.ModelSerializer):
     book = SimpleBookSerializer(read_only=True)
 
     class Meta:
-        model = Review
-        fields = ['id', 'score', 'description', 'state', 'book']
-        read_only_fields = ['state']
+        model = ReviewRequest
+        fields = ['id', 'score', 'description', 'book']
 
     def validate_score(self, value):
         if value < 0 or value > 5:
@@ -30,9 +29,9 @@ class SimpleReviewSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
 
     class Meta:
-        model = Review
+        model = ReviewRequest
         fields = [
-            'type', 'id', 'score', 'description', 'state'
+            'type', 'id', 'score', 'description'
         ]
 
     def get_type(self, obj):

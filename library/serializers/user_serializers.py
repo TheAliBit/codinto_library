@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from core.models import Profile
+from library.models import ReviewRequest
 
 
 class FullUserSerializer(serializers.ModelSerializer):
@@ -17,3 +18,9 @@ class SimpleUserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'picture'
         ]
+
+
+class UserCreateReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReviewRequest
+        fields = '__all__'

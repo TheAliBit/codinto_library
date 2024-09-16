@@ -1,7 +1,7 @@
 from django.db.models import Q, Count
 from django_filters import rest_framework as filters
 
-from library.models import Book, Review, Notification
+from library.models import Book, ReviewRequest, Notification
 
 
 class CustomBookFilterSet(filters.FilterSet):
@@ -34,7 +34,7 @@ class CustomReviewFilterSet(filters.FilterSet):
     end_date = filters.DateFilter(field_name='created_at', lookup_expr='lte', label='زمان پایان')
 
     class Meta:
-        model = Review
+        model = ReviewRequest
         fields = ['start_date', 'end_date']
 
 

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from library.models import BorrowRequest, Book, ExtensionRequest, Review, ReturnRequest, BaseRequestModel
+from library.models import BorrowRequest, Book, ExtensionRequest, ReviewRequest, ReturnRequest, BaseRequestModel
 from library.serializers.book_serializers import SimpleBookSerializer
 
 
@@ -46,8 +46,8 @@ class ReviewRequestSerializer(serializers.ModelSerializer):
     request_type = serializers.SerializerMethodField()
 
     class Meta:
-        model = Review
-        fields = ['request_type', 'id', 'created_at', 'score', 'description', 'state', 'book']
+        model = ReviewRequest
+        fields = ['request_type', 'id', 'created_at', 'score', 'description', 'book']
 
     def get_request_type(self, obj):
         return 'ReviewRequest'
@@ -64,7 +64,7 @@ class UserRequestSerializer(serializers.Serializer):
             return BorrowRequestSerializer(obj).data
         elif isinstance(obj, ExtensionRequest):
             return ExtensionRequestSerializer(obj).data
-        elif isinstance(obj, Review):
+        elif isinstance(obj, ReviewRequest):
             return ReviewRequestSerializer(obj).data
         else:
             return None

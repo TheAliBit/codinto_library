@@ -1,14 +1,8 @@
-from msilib import Directory
-
-from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from django.db import transaction
-from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
-from django.contrib.auth import authenticate, get_user_model
 from .utils import black_list_refresh_token, get_access_from_refresh
 from core.serializers.registration_serializers import LoginSerializer, RefreshSerializer
 from core.serializers.profile_serializers import ProfileSerializer, AdminSingleProfileSerializer
