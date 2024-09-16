@@ -271,7 +271,7 @@ class UserNotificationList(ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return Notification.objects.filter(user=user)
+        return Notification.objects.filter(user__is_superuser=True)
 
 
 class AdminNotificationView(ListAPIView, CreateAPIView):
@@ -279,6 +279,18 @@ class AdminNotificationView(ListAPIView, CreateAPIView):
 
     def get_queryset(self):
         return Notification.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(
+            user=self.request.user,
+        )
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserReviewView(CreateAPIView):
