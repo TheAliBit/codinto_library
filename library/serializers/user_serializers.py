@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from core.models import Profile
-from library.models import ReviewRequest
+from library.models import ReviewRequest, BorrowRequest, ReturnRequest
 
 
 class FullUserSerializer(serializers.ModelSerializer):
@@ -28,6 +28,17 @@ class UserCreateReviewSerializer(serializers.ModelSerializer):
             'id', 'score', 'description', 'status'
         ]
         read_only_fields = ['status']
+
+    def validate(self, data):
+
+        user = self.context['request'].user
+        book = self.context['view'].kwargs.get('pk')
+
+        if ReviewRequest.objects.filter(user=user, book=book).exists():
+            raise ValidationError('! شما برای این کتاب نظر ثبت کردید')
+        elif not ReturnRequest.objects.filter(user=user, book=book, status='accepted').exists():
+            raise ValidationError("! شما ابتدا باید مطالعه این کتاب را به پایان برسانید")
+        return data
 
     def validate_score(self, value):
         if value is None:
