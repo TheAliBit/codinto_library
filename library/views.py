@@ -271,7 +271,9 @@ class UserNotificationList(ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return Notification.objects.filter(user__is_superuser=True)
+        return Notification.objects.filter(
+            Q(user=user) or Q(user__is_superuser=True)
+        )
 
 
 class AdminNotificationView(ListAPIView, CreateAPIView):
