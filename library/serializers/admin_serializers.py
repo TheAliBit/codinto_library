@@ -1,3 +1,5 @@
+from multiprocessing.managers import public_methods
+
 from rest_framework import serializers
 from library.models import BaseRequestModel, Notification
 from library.serializers.book_serializers import FullBookSerializer, SimpleBookSerializer
@@ -46,9 +48,12 @@ class AdminRequestSerializer(serializers.ModelSerializer):
 
 
 class AdminNotificationSerializer(serializers.ModelSerializer):
-    user = SimpleUserSerializer(read_only=True)
-    book = SimpleBookSerializer(read_only=True)
-
     class Meta:
         model = Notification
-        fields = ['user', 'book', 'title', 'description', 'image', 'type']
+        fields = ['title', 'description', 'image']
+
+    def create(self, validated_data):
+        request = self.context['request']
+        if request.user.is_superuser:
+            validated_data['type'] = 'public'
+        return super().create(validated_data)
