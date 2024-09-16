@@ -158,8 +158,8 @@ class ExtensionRequest(BaseRequestModel):
 
 
 class ReviewRequest(BaseRequestModel):
-    score = models.IntegerField(verbose_name="امتیاز", default=0)
-    description = models.TextField(verbose_name="متن نظر", default='default')
+    score = models.IntegerField(null=True, verbose_name="امتیاز")
+    description = models.TextField(null=True, verbose_name="متن نظر")
 
     class Meta:
         verbose_name = "نظر"

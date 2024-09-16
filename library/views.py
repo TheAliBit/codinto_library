@@ -1,6 +1,7 @@
 from itertools import chain
 
 from django.db.models import Count, Q
+from django.utils.datetime_safe import datetime
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
@@ -213,9 +214,6 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
         elif request.type == 'extension':
             self.handle_extension_request(request)
 
-        # elif request.type == 'return':
-        #     self.handle_return_request(request)
-
     def handle_borrow_request(self, request):
         book = Book.objects.filter(id=request.book_id).first()
         if book and book.count > 0:
@@ -277,8 +275,9 @@ class AdminNotificationView(ListAPIView, CreateAPIView):
         return Notification.objects.all()
 
 
-class UserReviewView(RetrieveAPIView, CreateAPIView):
+class UserReviewView(CreateAPIView):
     serializer_class = UserCreateReviewSerializer
+
     def perform_create(self, serializer):
         book_id = self.kwargs.get('pk')
         book = get_object_or_404(Book, pk=book_id)
@@ -289,24 +288,10 @@ class UserReviewView(RetrieveAPIView, CreateAPIView):
             type='review'
         )
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
 
-    class UserExtensionRequestView(CreateAPIView):
-        serializer_class = UserExtensionRequestSerializer
-
-        def perform_create(self, serializer):
-            book_id = self.kwargs.get('pk')
-            book = get_object_or_404(Book, pk=book_id)
-            serializer.save(
-                book=book,
-                user=self.request.user,
-                status='pending',
-                type='extension'
-            )
-
-        def create(self, request, *args, **kwargs):
-            serializer = self.get_serializer(data=request.data)
-
-            if serializer.is_valid():
-                self.perform_create(serializer)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

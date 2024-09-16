@@ -24,13 +24,14 @@ class AdminRequestSerializer(serializers.ModelSerializer):
         elif obj.type == 'extension':
             serializer = ExtensionRequestSerializer(obj.extensionrequest)
         elif obj.type == 'review':
-            serializer = SimpleReviewSerializer(obj)
+            serializer = SimpleReviewSerializer(obj.reviewrequest)
         elif obj.type == 'return':
             serializer = ViewReturnRequestSerializer(obj.returnrequest)
         else:
             return None
 
         return serializer.data
+
 
     def validate_status(self, value):
         valid_status = ['accepted', 'pending']
