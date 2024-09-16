@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from core.models import Profile
-from library.models import ReviewRequest, BorrowRequest, ReturnRequest
+from library.models import ReviewRequest,  ReturnRequest
 
 
 class FullUserSerializer(serializers.ModelSerializer):
