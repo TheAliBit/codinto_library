@@ -323,6 +323,10 @@ class AvailableRemainderView(CreateAPIView):
     def perform_create(self, serializer):
         book_id = self.kwargs.get('pk')
         book = get_object_or_404(Book, pk=book_id)
+
+        if book.count > 0:
+            raise ValidationError({"message": "!موجودی کتاب هنوز صفر نشده"})
+
         serializer.save(
             book=book,
             user=self.request.user,
