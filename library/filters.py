@@ -1,7 +1,8 @@
 from django.db.models import Q, Count
+from django.utils import timezone
 from django_filters import rest_framework as filters
 
-from library.models import Book, ReviewRequest, Notification
+from library.models import Book, ReviewRequest, Notification, BorrowRequest
 
 
 class CustomBookFilterSet(filters.FilterSet):
@@ -49,3 +50,18 @@ class CustomPublicNotificationsFilter(filters.FilterSet):
         if value:
             return queryset.filter(user__is_superuser=True)
         return queryset
+
+
+class CustomBorrowHistoryFilter(filters.FilterSet):
+    is_finished = filters.BooleanFilter(method='filter_is_finished', label="مطالعه شده")
+
+    class Meta:
+        model = BorrowRequest
+        fields = []
+
+    def filter_is_finished(self, queryset, name, value):
+        now = timezone.now()
+        if value:
+            return queryset.filter(end_date__lt=now)
+        else:
+            return queryset.filter(end_date__gt=now)

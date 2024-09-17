@@ -1,6 +1,7 @@
 from itertools import chain
 
 from django.db.models import Count, Q
+from django.utils import timezone
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
@@ -15,12 +16,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from library.filters import CustomBookFilterSet, CustomPublicNotificationsFilter
+from library.filters import CustomBookFilterSet, CustomBorrowHistoryFilter
 from library.serializers.book_serializers import FullBookSerializer, SingleBookUserSerializer
 from library.serializers.category_serializers import CategorySerializer
 from library.serializers.home_page_serializers import BookSerializer, BookSerializerForAdmin, \
     BookListSerializerForAdmin, BookAvailableRemainderSerializer
-from .models import Book, Category, ReviewRequest, BorrowRequest, ExtensionRequest, BaseRequestModel, Notification
+from .models import Book, Category, ReviewRequest, BorrowRequest, ExtensionRequest, BaseRequestModel, Notification, \
+    ReturnRequest
 from .serializers.Request_serializers import UserRequestSerializer, \
     UserBorrowRequestSerializer, UserExtensionRequestSerializer, UserReturnRequestSerializer, BaseRequestSerializer
 from .serializers.admin_serializers import AdminRequestSerializer, AdminNotificationSerializer, BorrowHistorySerializer
@@ -219,6 +221,8 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
             self.handle_borrow_request(request)
         elif request.type == 'extension':
             self.handle_extension_request(request)
+        elif request.type == 'return':
+            self.handle_return_request(request)
 
     def handle_borrow_request(self, request):
         book = Book.objects.filter(id=request.book_id).first()
@@ -234,11 +238,13 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
         extension_request = ExtensionRequest.objects.get(id=request.id)
         extension_request.extend_duration(self.request)
 
-    # def handle_return_request(self, request):
-    #     borrow_request = BorrowRequest.objects.get(id=request.id)
-    #     extension_request = ExtensionRequest.objects.get(id=request.id)
-    #     borrow_request.reset_duration(self.request)
-    #     extension_request.reset_duration(self.request)
+    def handle_return_request(self, request):
+        return_request = ReturnRequest.objects.get(id=request.id)
+        user = return_request.user
+        book = return_request.book
+        borrow_request = BorrowRequest.objects.get(user=user, book=book)
+        borrow_request.end_date = timezone.now()
+        borrow_request.save()
 
 
 class AdminBookView(ListAPIView, CreateAPIView):
@@ -267,7 +273,8 @@ class UserMyBookView(ListAPIView):
 class UserNotificationList(ListAPIView):
     serializer_class = UserNotificationSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_class = CustomPublicNotificationsFilter
+
+    # filterset_class = CustomPublicNotificationsFilter
 
     def get_queryset(self):
         user = self.request.user
@@ -343,6 +350,9 @@ class AvailableRemainderView(CreateAPIView):
 
 class BorrowHistoryView(ListAPIView):
     serializer_class = BorrowHistorySerializer
+
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = CustomBorrowHistoryFilter
 
     def get_queryset(self):
         return BorrowRequest.objects.filter(status='accepted')

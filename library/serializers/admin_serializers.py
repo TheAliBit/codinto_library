@@ -3,7 +3,6 @@ from rest_framework import serializers
 from core.models import Profile
 from library.models import BaseRequestModel, Notification, BorrowRequest, Book, ReturnRequest
 from library.serializers.book_serializers import FullBookSerializer
-from library.serializers.home_page_serializers import BookSerializer
 from library.serializers.review_serializers import SimpleReviewSerializer
 from library.serializers.user_serializers import FullUserSerializer
 from library.serializers.Request_serializers import BorrowRequestSerializer, ExtensionRequestSerializer, \
