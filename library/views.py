@@ -23,7 +23,7 @@ from library.serializers.home_page_serializers import BookSerializer, BookSerial
 from .models import Book, Category, ReviewRequest, BorrowRequest, ExtensionRequest, BaseRequestModel, Notification
 from .serializers.Request_serializers import UserRequestSerializer, \
     UserBorrowRequestSerializer, UserExtensionRequestSerializer, UserReturnRequestSerializer, BaseRequestSerializer
-from .serializers.admin_serializers import AdminRequestSerializer, AdminNotificationSerializer
+from .serializers.admin_serializers import AdminRequestSerializer, AdminNotificationSerializer, BorrowHistorySerializer
 from .serializers.notif_serializerss import UserNotificationSerializer
 from .serializers.review_serializers import DetailedReviewSerializer
 from .serializers.user_serializers import UserCreateReviewSerializer
@@ -339,3 +339,10 @@ class AvailableRemainderView(CreateAPIView):
             self.perform_create(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BorrowHistoryView(ListAPIView):
+    serializer_class = BorrowHistorySerializer
+
+    def get_queryset(self):
+        return BorrowRequest.objects.filter(status='accepted')
