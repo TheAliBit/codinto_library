@@ -16,7 +16,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from library.filters import CustomBookFilterSet, CustomPublicNotificationsFilter
-from library.serializers.book_serializers import FullBookSerializer
+from library.serializers.book_serializers import FullBookSerializer, SingleBookUserSerializer
 from library.serializers.category_serializers import CategorySerializer
 from library.serializers.home_page_serializers import BookSerializer, BookSerializerForAdmin, \
     BookListSerializerForAdmin, BookAvailableRemainderSerializer
@@ -49,7 +49,7 @@ class BookViewSet(viewsets.ReadOnlyModelViewSet):
 
 class DetailedBookView(RetrieveAPIView):
     queryset = Book.objects.all()
-    serializer_class = FullBookSerializer
+    serializer_class = SingleBookUserSerializer
 
 
 class HomePageAPIView(APIView):
