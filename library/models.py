@@ -124,15 +124,19 @@ class BorrowRequest(BaseRequestModel):
     ]
     time = models.IntegerField(choices=TIME_CHOICES, verbose_name="مدت زمان امانت")
     start_date = models.DateTimeField(null=True, blank=True, verbose_name='تاریخ شروع امانت')
+    end_date = models.DateTimeField(null=True, blank=True, verbose_name='تاریخ پایان امانت')
 
     class Meta:
         verbose_name = "درخواست امانت"
         verbose_name_plural = "درخواست‌های امانت"
 
     def calculate_duration(self, request):
-        self.duration = self.time
-        self.start_date = timezone.now()
-        self.save(update_fields=['start_date', 'duration'])
+        t = self.time
+        self.duration = t
+        now = timezone.now()
+        self.start_date = now
+        self.end_date = now + timezone.timedelta(days=t)
+        self.save(update_fields=['start_date', 'duration', 'end_date'])
 
     def reset_duration(self):
         self.duration = 0
