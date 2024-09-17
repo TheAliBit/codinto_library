@@ -17,7 +17,7 @@ class BorrowRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = BorrowRequest
         fields = [
-            'type', 'id', 'duration', 'status', 'start_date'
+            'type', 'id', 'duration', 'status', 'start_date', 'end_date'
         ]
 
     def get_start_date(self, obj):
