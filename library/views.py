@@ -29,6 +29,7 @@ from .serializers.admin_serializers import AdminRequestSerializer, AdminNotifica
 from .serializers.notif_serializerss import UserNotificationSerializer
 from .serializers.review_serializers import DetailedReviewSerializer
 from .serializers.user_serializers import UserCreateReviewSerializer
+from .tasks import notify_customer
 
 
 class CategoryViewSet(ModelViewSet):
@@ -355,4 +356,5 @@ class BorrowHistoryView(ListAPIView):
     filterset_class = CustomBorrowHistoryFilter
 
     def get_queryset(self):
+        notify_customer.delay('Mohammad Ali Shahidi Pour')
         return BorrowRequest.objects.filter(status='accepted')

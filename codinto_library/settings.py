@@ -13,7 +13,9 @@ import os
 from pathlib import Path
 from decouple import config
 from .jwt_settings import SIMPLE_JWT
+from .redis_caches import CACHES
 from .rest_framework_settings import *
+from .celery_settings import *
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -51,7 +53,6 @@ INSTALLED_APPS = [
     'core',
     'library',
 ]
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -148,14 +149,3 @@ SIMPLE_JWT_CONFIG = SIMPLE_JWT
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",  # This is your local Redis instance
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
-    }
-}
