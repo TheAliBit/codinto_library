@@ -1,5 +1,3 @@
-from itertools import chain
-
 from django.db.models import Count, Q
 from django.utils import timezone
 
@@ -122,12 +120,8 @@ class RequestsListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        borrow_requests = BorrowRequest.objects.filter(user=user)
-        extension_requests = ExtensionRequest.objects.filter(user=user)
-        review_requests = ReviewRequest.objects.filter(user=user)
-        combined_queryset = list(chain(borrow_requests, extension_requests, review_requests))
-        combined_queryset.sort(key=lambda x: x.created_at, reverse=True)
-        return combined_queryset
+        queryset = BaseRequestModel.objects.filter(user=user)
+        return queryset.order_by('created_at')
 
 
 class UserBorrowRequestView(CreateAPIView):

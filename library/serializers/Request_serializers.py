@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
 from library.models import BorrowRequest, Book, ExtensionRequest, ReviewRequest, ReturnRequest, BaseRequestModel
-from library.serializers.book_serializers import SimpleBookSerializer
+from library.serializers.book_serializers import SimpleBookSerializer, FullBookSerializer
+from library.serializers.review_serializers import SimpleReviewSerializer
 
 
 class BookDetailForBorrowRequestSerializer(serializers.ModelSerializer):
@@ -54,20 +55,28 @@ class ReviewRequestSerializer(serializers.ModelSerializer):
 
 
 class UserRequestSerializer(serializers.Serializer):
-    request = serializers.SerializerMethodField()
+    book = SimpleBookSerializer(read_only=True)
+    request_detail = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ['request']
+        model = BaseRequestModel
+        fields = [
+            'id', 'created_at', 'updated_at', 'request_detail', 'user', 'book', 'status'
+        ]
 
-    def get_request(self, obj):
-        if isinstance(obj, BorrowRequest):
-            return BorrowRequestSerializer(obj).data
-        elif isinstance(obj, ExtensionRequest):
-            return ExtensionRequestSerializer(obj).data
-        elif isinstance(obj, ReviewRequest):
-            return ReviewRequestSerializer(obj).data
+    def get_request_detail(self, obj):
+        if obj.type == 'borrow':
+            serializer = BorrowRequestSerializer(obj.borrowrequest)
+        elif obj.type == 'extension':
+            serializer = ExtensionRequestSerializer(obj.extensionrequest)
+        elif obj.type == 'review':
+            serializer = SimpleReviewSerializer(obj.reviewrequest)
+        elif obj.type == 'return':
+            serializer = ViewReturnRequestSerializer(obj.returnrequest)
         else:
             return None
+
+        return serializer.data
 
 
 class UserBorrowRequestSerializer(serializers.ModelSerializer):
