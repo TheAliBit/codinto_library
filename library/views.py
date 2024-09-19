@@ -29,7 +29,6 @@ from .serializers.admin_serializers import AdminRequestSerializer, AdminNotifica
 from .serializers.notif_serializerss import UserNotificationSerializer
 from .serializers.review_serializers import DetailedReviewSerializer
 from .serializers.user_serializers import UserCreateReviewSerializer
-from .tasks import send_sms_task
 
 
 class CategoryViewSet(ModelViewSet):
@@ -222,7 +221,8 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
             self.handle_request(instance)
         elif instance.status == 'rejected':
             self.handle_rejection(instance)
-        self.send_sms_notification(instance)
+        # self.send_sms_notification(instance)
+        self.create_notification(instance)
 
     def handle_request(self, request):
         if request.type == 'borrow':
@@ -263,28 +263,40 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
         # i added here for myself, it's not important
         pass
 
-    def send_sms_notification(self, request):
-        user_phone = request.user.phone_number
-        message = self.generate_sms_message(request)
-        send_sms_task.delay(user_phone, message)
-        # send_sms(user_phone, message)
+    def create_notification(self, request):
+        title = f"درخواست {request.type} شما توسط ادمین {request.status}"
+        description = f"درخواست {request.type} شما برای کتاب {request.book.title} توسط ادمین {request.status}"
 
-    def generate_sms_message(self, request):
-        request_type_map = {
-            'borrow': 'درخواست امانت',
-            'extension': 'درخواست تمدید',
-            'return': 'درخواست بازگشت',
-            'review': 'درخواست ثبت نظر'
-        }
-        request_status_map = {
-            'accepted': 'تایید شد',
-            'rejected': 'رد شد'
-        }
-        user_name = request.user.username
-        book_name = request.book.title
-        request_type = request_type_map.get(request.type, 'درخواست')
-        request_status = request_status_map.get(request.status, 'نامشخص')
-        return f"{user_name} عزیز, {request_type} شما برای کتاب {book_name} {request_status}!"
+        Notification.objects.create(
+            user=request.user,
+            book=request.book,
+            title=title,
+            description=description,
+            type='request'
+        )
+
+    # def send_sms_notification(self, request):
+    #     user_phone = request.user.phone_number
+    #     message = self.generate_sms_message(request)
+    #     send_sms_task.delay(user_phone, message)
+    #     # send_sms(user_phone, message)
+
+    # def generate_sms_message(self, request):
+    #     request_type_map = {
+    #         'borrow': 'درخواست امانت',
+    #         'extension': 'درخواست تمدید',
+    #         'return': 'درخواست بازگشت',
+    #         'review': 'درخواست ثبت نظر'
+    #     }
+    #     request_status_map = {
+    #         'accepted': 'تایید شد',
+    #         'rejected': 'رد شد'
+    #     }
+    #     user_name = request.user.username
+    #     book_name = request.book.title
+    #     request_type = request_type_map.get(request.type, 'درخواست')
+    #     request_status = request_status_map.get(request.status, 'نامشخص')
+    #     return f"{user_name} عزیز, {request_type} شما برای کتاب {book_name} {request_status}!"
 
 
 class AdminBookView(ListAPIView, CreateAPIView):
