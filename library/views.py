@@ -16,7 +16,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from codinto_library.utils import send_sms
 from library.filters import CustomBookFilterSet, CustomBorrowHistoryFilter
 from library.serializers.book_serializers import FullBookSerializer, SingleBookUserSerializer
 from library.serializers.category_serializers import CategorySerializer
@@ -30,7 +29,7 @@ from .serializers.admin_serializers import AdminRequestSerializer, AdminNotifica
 from .serializers.notif_serializerss import UserNotificationSerializer
 from .serializers.review_serializers import DetailedReviewSerializer
 from .serializers.user_serializers import UserCreateReviewSerializer
-from .tasks import notify_customer
+from .tasks import send_sms_task
 
 
 class CategoryViewSet(ModelViewSet):
@@ -223,7 +222,6 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
             self.handle_request(instance)
         elif instance.status == 'rejected':
             self.handle_rejection(instance)
-        # After updating the status, send an SMS notification
         self.send_sms_notification(instance)
 
     def handle_request(self, request):
@@ -255,36 +253,38 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
         return_request = ReturnRequest.objects.get(id=request.id)
         user = return_request.user
         book = return_request.book
+        book.count += 1
+        book.save()
         borrow_request = BorrowRequest.objects.get(user=user, book=book)
         borrow_request.end_date = timezone.now()
         borrow_request.save()
 
     def handle_rejection(self, request):
-        # You can add any additional logic for rejected requests here
+        # i added here for myself, it's not important
         pass
 
     def send_sms_notification(self, request):
-        user_phone = request.user.phone_number  # Assuming the user model has a phone number field
-        print(user_phone)
+        user_phone = request.user.phone_number
         message = self.generate_sms_message(request)
-        print(message)
-        send_sms(user_phone, message)  # Your existing SMS function
+        send_sms_task.delay(user_phone, message)
+        # send_sms(user_phone, message)
 
     def generate_sms_message(self, request):
-        # Generate different messages based on request type and status
         request_type_map = {
             'borrow': 'درخواست امانت',
             'extension': 'درخواست تمدید',
             'return': 'درخواست بازگشت',
-            'review':'درخواست ثبت نظر'
+            'review': 'درخواست ثبت نظر'
         }
         request_status_map = {
             'accepted': 'تایید شد',
             'rejected': 'رد شد'
         }
+        user_name = request.user.username
+        book_name = request.book.title
         request_type = request_type_map.get(request.type, 'درخواست')
         request_status = request_status_map.get(request.status, 'نامشخص')
-        return f"{request_type} شما {request_status}."
+        return f"{user_name} عزیز, {request_type} شما برای کتاب {book_name} {request_status}!"
 
 
 class AdminBookView(ListAPIView, CreateAPIView):
@@ -395,5 +395,4 @@ class BorrowHistoryView(ListAPIView):
     filterset_class = CustomBorrowHistoryFilter
 
     def get_queryset(self):
-        notify_customer.delay('Mohammad Ali Shahidi Pour')
         return BorrowRequest.objects.filter(status='accepted')

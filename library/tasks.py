@@ -1,9 +1,9 @@
-from time import sleep
+
 from celery import shared_task
 
+from codinto_library.utils import send_sms
+
+
 @shared_task
-def notify_customer(message):
-    print('sending 10k emails ...')
-    print(message)
-    sleep(10)
-    print('emails were successfully sent!')
+def send_sms_task(phone_number, message):
+    send_sms(phone_number, message)

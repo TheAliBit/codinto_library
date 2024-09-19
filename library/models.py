@@ -1,8 +1,10 @@
 from django.db import models
 from django.utils import timezone
 
+
 from core.models import BaseModel
 from core.models import Profile
+
 
 
 # Create your models here.
@@ -42,6 +44,16 @@ class Book(BaseModel, models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            from library.utils import handle_availability
+            old_count = Book.objects.get(pk=self.pk).count
+
+            if old_count == 0 and self.count > 0:
+                handle_availability(self.id)
+
+        super().save(*args, **kwargs)
 
 
 # class Review(BaseModel, models.Model):
