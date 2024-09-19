@@ -4,8 +4,8 @@ from django.utils import timezone
 
 from django.shortcuts import get_object_or_404
 
-from codinto_library.utils import send_sms
 from .models import BorrowRequest, ExtensionRequest, Book, ReturnRequest, Notification
+from .tasks import send_sms_task
 
 
 def calculate_end_date(request, book_id):
@@ -40,5 +40,5 @@ def handle_availability(book_id):
         user_profile = notification.user
         if user_profile and user_profile.phone_number:
             message = f"سلام {user_profile} عزیز, کتاب {book.title} موجود شد"
-            send_sms(user_profile.phone_number, message)
+            send_sms_task.delay(user_profile.phone_number, message)
             available_notifications.delete()
