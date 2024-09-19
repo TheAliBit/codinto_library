@@ -9,3 +9,5 @@ venv
 */migrations/*
 !*/migrations/__init__.py
 media/
+celerybeat-schedule
+
