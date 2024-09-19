@@ -2,10 +2,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from codinto_library import settings
-from core.urls import urlpatterns
 from library.models import Book, ReviewRequest, Notification
-from library.serializers.book_serializers import FullBookSerializer
-from library.serializers.user_serializers import FullUserSerializer
 
 
 class BookSerializer(serializers.ModelSerializer):
@@ -67,8 +64,9 @@ class BookSerializerForAdmin(serializers.ModelSerializer):
         ]
 
     def validate_title(self, value):
-        if Book.objects.filter(title=value).exists():
-            raise ValidationError("!کتابی با این نام موجود هست")
+        if not self.instance:
+            if Book.objects.filter(title=value).exists():
+                raise ValidationError("!کتابی با این نام موجود هست")
         return value
 
 
