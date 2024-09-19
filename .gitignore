@@ -11,3 +11,7 @@ venv
 media/
 celerybeat-schedule
 
+!/celerybeat-schedule.dir
+!/celerybeat-schedule.db
+!/celerybeat-schedule.dat
+!/celerybeat-schedule.bak
