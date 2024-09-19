@@ -1,6 +1,6 @@
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAdminUser
 from django.db import transaction
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from .utils import black_list_refresh_token, get_access_from_refresh
@@ -47,7 +47,7 @@ class LogoutAPIView(generics.CreateAPIView):
 
 class RefreshAPIView(generics.CreateAPIView):
     serializer_class = RefreshSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     @transaction.atomic
     def create(self, request, *args, **kwargs):
@@ -83,18 +83,21 @@ class ProfileUpdateView(mixins.RetrieveModelMixin,
 
 class SearchUserView(ListAPIView):
     serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]
     search_fields = ['username', 'first_name', 'last_name', 'email', 'phone_number', 'telegram_id']
     queryset = Profile.objects.all()
 
 
 class AdminListProfileView(ListAPIView, CreateAPIView):
     serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]
     search_fields = ['username', 'first_name', 'last_name', 'email', 'phone_number', 'telegram_id']
     queryset = Profile.objects.all()
 
 
 class AdminSingleProfileView(RetrieveAPIView, UpdateAPIView, DestroyAPIView):
     serializer_class = AdminSingleProfileSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get_queryset(self):
         return Profile.objects.all()

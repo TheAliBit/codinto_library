@@ -9,7 +9,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import DestroyAPIView, UpdateAPIView, RetrieveAPIView, CreateAPIView, \
     get_object_or_404, ListAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
@@ -30,6 +30,7 @@ from .serializers.user_serializers import UserCreateReviewSerializer
 
 
 class CategoryViewSet(ModelViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = Category.objects.order_by('id')
     serializer_class = CategorySerializer
     filterset_fields = ['parent']
@@ -45,14 +46,16 @@ class CategoryViewSet(ModelViewSet):
 class BookViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Book.objects.order_by('id')
     serializer_class = BookSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class DetailedBookView(RetrieveAPIView):
     queryset = Book.objects.all()
     serializer_class = SingleBookUserSerializer
-
+    permission_classes = [IsAuthenticated]
 
 class HomePageAPIView(APIView):
+    permission_classes = [IsAuthenticated]
     @staticmethod
     def get(request, *args, **kwargs):
         newest_books = Book.objects.order_by('-created_at')[:10]
@@ -88,6 +91,7 @@ class SearchListAPIView(ListAPIView):
 
 class UserReviewListView(generics.ListAPIView):
     serializer_class = DetailedReviewSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
@@ -97,6 +101,7 @@ class UserReviewListView(generics.ListAPIView):
 
 class UserReviewDetailView(generics.RetrieveAPIView, generics.DestroyAPIView, generics.UpdateAPIView):
     serializer_class = DetailedReviewSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
@@ -117,6 +122,7 @@ class UserReviewDetailView(generics.RetrieveAPIView, generics.DestroyAPIView, ge
 
 class RequestsListView(generics.ListAPIView):
     serializer_class = UserRequestSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
@@ -126,6 +132,7 @@ class RequestsListView(generics.ListAPIView):
 
 class UserBorrowRequestView(CreateAPIView):
     serializer_class = UserBorrowRequestSerializer
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         book_id = self.kwargs.get('pk')
@@ -148,6 +155,7 @@ class UserBorrowRequestView(CreateAPIView):
 
 class UserExtensionRequestView(CreateAPIView):
     serializer_class = UserExtensionRequestSerializer
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         book_id = self.kwargs.get('pk')
@@ -170,6 +178,7 @@ class UserExtensionRequestView(CreateAPIView):
 
 class UserReturnRequestView(CreateAPIView):
     serializer_class = UserReturnRequestSerializer
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         book_id = self.kwargs.get('pk')
@@ -192,6 +201,7 @@ class UserReturnRequestView(CreateAPIView):
 
 class AdminRequestView(ListAPIView):
     serializer_class = AdminRequestSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]
     search_fields = ['status']
 
     def get_queryset(self):
@@ -201,6 +211,7 @@ class AdminRequestView(ListAPIView):
 
 class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
     serializer_class = AdminRequestSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get_queryset(self):
         return BaseRequestModel.objects.all()
@@ -295,6 +306,7 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
 
 class AdminBookView(ListAPIView, CreateAPIView):
     serializer_class = BookListSerializerForAdmin
+    permission_classes = [IsAuthenticated, IsAdminUser]
     search_fields = ['title']
 
     def get_queryset(self):
@@ -304,6 +316,7 @@ class AdminBookView(ListAPIView, CreateAPIView):
 
 class AdminSingleBookView(RetrieveAPIView, UpdateAPIView, DestroyAPIView):
     serializer_class = BookSerializerForAdmin
+    permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get_queryset(self):
         return Book.objects.all()
@@ -311,6 +324,7 @@ class AdminSingleBookView(RetrieveAPIView, UpdateAPIView, DestroyAPIView):
 
 class UserMyBookView(ListAPIView):
     serializer_class = BaseRequestSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return BaseRequestModel.objects.filter(user=self.request.user, status='accepted', type='borrow')
@@ -318,6 +332,7 @@ class UserMyBookView(ListAPIView):
 
 class UserNotificationList(ListAPIView):
     serializer_class = UserNotificationSerializer
+    permission_classes = [IsAuthenticated]
     filter_backends = (DjangoFilterBackend,)
 
     # filterset_class = CustomPublicNotificationsFilter
@@ -331,6 +346,7 @@ class UserNotificationList(ListAPIView):
 
 class AdminNotificationView(ListAPIView, CreateAPIView):
     serializer_class = AdminNotificationSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get_queryset(self):
         return Notification.objects.all()
@@ -350,6 +366,7 @@ class AdminNotificationView(ListAPIView, CreateAPIView):
 
 class UserReviewView(CreateAPIView):
     serializer_class = UserCreateReviewSerializer
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         book_id = self.kwargs.get('pk')
@@ -372,6 +389,7 @@ class UserReviewView(CreateAPIView):
 
 class AvailableRemainderView(CreateAPIView):
     serializer_class = BookAvailableRemainderSerializer
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         book_id = self.kwargs.get('pk')
@@ -396,6 +414,7 @@ class AvailableRemainderView(CreateAPIView):
 
 class BorrowHistoryView(ListAPIView):
     serializer_class = BorrowHistorySerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]
 
     filter_backends = (DjangoFilterBackend,)
     filterset_class = CustomBorrowHistoryFilter
