@@ -10,7 +10,6 @@ from core.models import Profile
 # Create your models here.
 class Category(models.Model):
     title = models.CharField(max_length=255, unique=True, verbose_name="عنوان دسته‌بندی")
-    image = models.ImageField(upload_to='uploads/', verbose_name="تصویر دسته‌بندی")
     parent = models.ForeignKey('self', blank=True, null=True, on_delete=models.SET_NULL, related_name='children',
                                verbose_name="دسته‌بندی پدر")
 

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from library.models import BorrowRequest, Book, ExtensionRequest, ReviewRequest, ReturnRequest, BaseRequestModel
-from library.serializers.book_serializers import SimpleBookSerializer, FullBookSerializer
+from library.serializers.book_serializers import SimpleBookSerializer
 from library.serializers.review_serializers import SimpleReviewSerializer
 
 
