@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from core.models import Profile
 from library.models import BaseRequestModel, Notification, BorrowRequest, Book, ReturnRequest
-from library.serializers.book_serializers import  FullBookSerializerForAdminRequest
+from library.serializers.book_serializers import FullBookSerializerForAdminRequest
 from library.serializers.review_serializers import SimpleReviewSerializer
 from library.serializers.user_serializers import FullUserSerializer
 from library.serializers.Request_serializers import BorrowRequestSerializer, ExtensionRequestSerializer, \
@@ -78,7 +78,7 @@ class BorrowHistorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BorrowRequest
-        fields = ['book', 'user', 'start_date', 'end_date', 'retrun_date']
+        fields = ['id', 'book', 'user', 'start_date', 'end_date', 'retrun_date']
 
     def get_retrun_date(self, obj):
         user = obj.user

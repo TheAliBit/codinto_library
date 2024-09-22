@@ -34,6 +34,5 @@ urlpatterns = [
     path('super-user/books/<int:pk>/', AdminSingleBookView.as_view(), name='admin-single-request'),
     path('super-user/notifications/', AdminNotificationView.as_view(), name='admin-creat-notifications'),
     path('super-user/history/',BorrowHistoryView.as_view(), name ='borrow_history'),
-    # path('super-user/category/', AdminCategoryView.as_view(), name ='admin-category'),
     path('super-user/category/', CategoryViewSet.as_view({'get': 'list', 'post': 'create'}),  name='category-list'),
 ] + router.urls

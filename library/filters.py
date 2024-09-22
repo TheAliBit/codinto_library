@@ -4,7 +4,6 @@ from django_filters import rest_framework as filters
 
 from library.models import Book, ReviewRequest, Notification, BorrowRequest
 
-
 class CustomBookFilterSet(filters.FilterSet):
     filter_type = filters.ChoiceFilter(
         method='filter_by_type',

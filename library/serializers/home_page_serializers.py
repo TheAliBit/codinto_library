@@ -123,6 +123,6 @@ class BookAvailableRemainderSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         user = self.context['request'].user
         book = self.context['view'].kwargs.get('pk')
-        if Notification.objects.filter(user=user, book=book).exists():
+        if Notification.objects.filter(user=user, book=book, type='available').exists():
             raise ValidationError('! شما یکبار درخواست موجود شد به من اطلاع بدید رو انتخاب کردید')
         return attrs
