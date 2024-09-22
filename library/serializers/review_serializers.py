@@ -33,7 +33,7 @@ class SimpleReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReviewRequest
         fields = [
-            'type', 'id', 'score', 'description'
+            'type', 'score', 'description'
         ]
 
     def get_type(self, obj):

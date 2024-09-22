@@ -5,7 +5,7 @@ import jdatetime
 
 from codinto_library import settings
 from core.models import Profile
-from library.models import Book, ReviewRequest, Notification
+from library.models import Book, ReviewRequest, Notification, Category
 
 
 class BookSerializer(serializers.ModelSerializer):
@@ -45,13 +45,18 @@ class BookDetailSerializer(serializers.ModelSerializer):
 class BookListSerializerForAdmin(serializers.ModelSerializer):
     owner = serializers.PrimaryKeyRelatedField(queryset=Profile.objects.all())
     count = serializers.SerializerMethodField()
+    # category = CategorySerializer(read_only=True)
+    category_id = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(), write_only=True, source='category'
+    )
+    categories = serializers.SerializerMethodField()
 
     class Meta:
         model = Book
         fields = [
             'id', 'title', 'image', 'author', 'translator', 'publisher',
             'volume_number', 'publication_year', 'page_count', 'owner',
-            'description', 'count', 'category',
+            'description', 'count', 'category_id', 'categories'
         ]
         extra_kwargs = {'category': {'required': True}}
 
@@ -80,6 +85,18 @@ class BookListSerializerForAdmin(serializers.ModelSerializer):
         if not value:
             raise ValidationError("! کتگوری الزامیست")
         return value
+
+    def get_categories(self, obj):
+        def build_hierarchy(category):
+            if category is None:
+                return None
+            return {
+                'id': category.id,
+                'title': category.title,
+                'parent': build_hierarchy(category.parent)
+            }
+
+        return build_hierarchy(obj.category)
 
 
 class BookSerializerForAdmin(serializers.ModelSerializer):

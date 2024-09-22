@@ -18,7 +18,7 @@ class BorrowRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = BorrowRequest
         fields = [
-            'type', 'id', 'duration', 'status', 'start_date', 'end_date'
+            'type', 'duration', 'start_date', 'end_date'
         ]
 
     def get_start_date(self, obj):
@@ -35,7 +35,7 @@ class ExtensionRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExtensionRequest
         fields = [
-            'type', 'id', 'duration', 'status'
+            'type', 'duration'
         ]
 
     def get_type(self, obj):
@@ -114,7 +114,7 @@ class ReturnRequestSerializer(serializers.ModelSerializer):
 class ViewReturnRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReturnRequest
-        fields = ['type', 'id', 'status']
+        fields = ['type']
 
     # def validate(self, value):
     #     valid_status = ['accepted', 'pending']

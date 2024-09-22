@@ -2,14 +2,14 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from core.models import Profile
-from library.models import ReviewRequest,  ReturnRequest
+from library.models import ReviewRequest, ReturnRequest
 
 
 class FullUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = [
-            'id', 'username', 'first_name', 'last_name', 'email', 'phone_number', 'telegram_id', 'picture'
+            'id', 'username', 'picture'
         ]
 
 

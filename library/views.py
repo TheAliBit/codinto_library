@@ -54,8 +54,10 @@ class DetailedBookView(RetrieveAPIView):
     serializer_class = SingleBookUserSerializer
     permission_classes = [IsAuthenticated]
 
+
 class HomePageAPIView(APIView):
     permission_classes = [IsAuthenticated]
+
     @staticmethod
     def get(request, *args, **kwargs):
         newest_books = Book.objects.order_by('-created_at')[:10]
@@ -310,7 +312,7 @@ class AdminBookView(ListAPIView, CreateAPIView):
     search_fields = ['title']
 
     def get_queryset(self):
-        queryset = Book.objects.all()
+        queryset = Book.objects.select_related('category__parent__parent').all()
         return queryset.order_by('-created_at')
 
 
