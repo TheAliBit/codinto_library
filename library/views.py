@@ -421,3 +421,6 @@ class BorrowHistoryView(ListAPIView):
 
     def get_queryset(self):
         return BorrowRequest.objects.filter(status='accepted')
+
+# class AdminCategoryView(CreateAPIView, UpdateAPIView, DestroyAPIView):
+#     serializer_class =

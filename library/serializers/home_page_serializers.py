@@ -1,7 +1,10 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+import jdatetime
+
 from codinto_library import settings
+from core.models import Profile
 from library.models import Book, ReviewRequest, Notification
 
 
@@ -40,6 +43,7 @@ class BookDetailSerializer(serializers.ModelSerializer):
 
 
 class BookListSerializerForAdmin(serializers.ModelSerializer):
+    owner = serializers.PrimaryKeyRelatedField(queryset=Profile.objects.all())
     class Meta:
         model = Book
         fields = [
@@ -47,10 +51,26 @@ class BookListSerializerForAdmin(serializers.ModelSerializer):
             'volume_number', 'publication_year', 'page_count', 'owner',
             'description', 'count', 'category',
         ]
+        extra_kwargs = {'category': {'required': True}}
 
     def validate_title(self, value):
         if Book.objects.filter(title=value).exists():
             raise ValidationError("!کتابی با این نام موجود هست")
+        return value
+
+    def validate_publication_year(self, value):
+        current_shamsi_year = jdatetime.datetime.now().year
+        print(current_shamsi_year)
+        if  value < 1300:
+            raise ValidationError("! تاریخ انتشار نمیتواند زمانی قبل تر از سال 1300 باشد")
+        elif value > current_shamsi_year:
+            raise ValidationError("! تاریخ انتشار نمیتواند زمانی بعد تر از تاریخ حال حاظر باشد")
+        else:
+            return value
+
+    def validate_category(self, value):
+        if not value:
+            raise ValidationError("! کتگوری الزامیست")
         return value
 
 

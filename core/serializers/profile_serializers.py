@@ -1,3 +1,4 @@
+from django.core.validators import RegexValidator
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -8,7 +9,8 @@ from core.models import Profile
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['id', 'username', 'first_name', 'last_name', 'phone_number', 'email', 'telegram_id', 'picture']
+        fields = ['id', 'username', 'password', 'first_name', 'last_name', 'phone_number', 'email', 'telegram_id',
+                  'picture']
 
     def to_representation(self, instance):
         result = super().to_representation(instance)
@@ -17,6 +19,10 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class AdminListProfileSerializer(serializers.ModelSerializer):
+    phone_number = serializers.CharField(max_length=11,
+                                         validators=[RegexValidator(regex=r'^09\d{9}$',
+                                                                    message="! طول شماره تلفن باید 11 عدد باشد و با 09 شروع شود")])
+
     class Meta:
         model = Profile
         fields = ['id', 'username', 'first_name', 'last_name', 'phone_number', 'email', 'telegram_id', 'picture']
@@ -48,9 +54,13 @@ class AdminListProfileSerializer(serializers.ModelSerializer):
 
 
 class AdminSingleProfileSerializer(serializers.ModelSerializer):
+    phone_number = serializers.CharField(max_length=11,
+                                         validators=[RegexValidator(regex=r'^09\d{9}$',
+                                                                    message="! طول شماره تلفن باید 11 عدد باشد و با 09 شروع شود")])
+
     class Meta:
         model = Profile
-        fields = ['id', 'username', 'first_name', 'last_name', 'phone_number', 'email', 'telegram_id']
+        fields = ['id', 'username', 'password', 'first_name', 'last_name', 'phone_number', 'email', 'telegram_id']
 
     def validate_username(self, value):
         if value and Profile.objects.filter(username=value).exclude(id=self.instance.id).exists():

@@ -12,8 +12,6 @@ router = DefaultRouter()
 urlpatterns = [
     path('user/home/', HomePageAPIView.as_view(), name='home'),
     path('user/search/', SearchListAPIView.as_view(), name='search'),
-    path('user/category/', CategoryViewSet.as_view({'get': 'list', 'post': 'create'}),
-         name='category-list'),
     path('user/reviews/', UserReviewListView.as_view(), name='review-detail'),
     path('user/reviews/<int:pk>/', UserReviewDetailView.as_view(), name='review-detail'),
     path('user/books/', BookViewSet.as_view({'get': 'list'}), name='book-list'),
@@ -36,4 +34,6 @@ urlpatterns = [
     path('super-user/books/<int:pk>/', AdminSingleBookView.as_view(), name='admin-single-request'),
     path('super-user/notifications/', AdminNotificationView.as_view(), name='admin-creat-notifications'),
     path('super-user/history/',BorrowHistoryView.as_view(), name ='borrow_history'),
+    # path('super-user/category/', AdminCategoryView.as_view(), name ='admin-category'),
+    path('super-user/category/', CategoryViewSet.as_view({'get': 'list', 'post': 'create'}),  name='category-list'),
 ] + router.urls
