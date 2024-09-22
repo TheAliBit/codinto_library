@@ -92,7 +92,7 @@ class AdminListProfileView(ListAPIView, CreateAPIView):
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated, IsAdminUser]
     search_fields = ['username', 'first_name', 'last_name', 'email', 'phone_number', 'telegram_id']
-    queryset = Profile.objects.all()
+    queryset = Profile.objects.all().exclude(is_superuser=True)
 
 
 class AdminSingleProfileView(RetrieveAPIView, UpdateAPIView, DestroyAPIView):
