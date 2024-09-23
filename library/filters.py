@@ -2,18 +2,32 @@ from django.db.models import Q, Count
 from django.utils import timezone
 from django_filters import rest_framework as filters
 
-from library.models import Book, ReviewRequest, Notification, BorrowRequest
+from library.models import Book, ReviewRequest, Notification, BorrowRequest, Category
+
 
 class CustomBookFilterSet(filters.FilterSet):
+    is_available = filters.BooleanFilter(method='is_available_filter', label='فقط موجود ها')
     filter_type = filters.ChoiceFilter(
         method='filter_by_type',
         choices=[('latest', 'تازه ترین ها'), ('popular', 'پرطرفدار ها'), ('most_popular', 'محبوب ترین ها')],
         label='مرتب سازی'
     )
+    category = filters.ModelMultipleChoiceFilter(
+        queryset=Category.objects.all(),
+        field_name='category',
+        conjoined=False,
+        label="دسته بندی"
+    )
 
     class Meta:
         model = Book
         fields = ['category', 'filter_type']
+
+    def is_available_filter(self, queryset, name, value):
+        if value == True:
+            return queryset.filter(count__gt=0)
+        else:
+            return queryset.filter(count=0)
 
     def filter_by_type(self, queryset, name, value):
         if value == 'latest':
