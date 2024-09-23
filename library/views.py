@@ -135,10 +135,18 @@ class RequestsListView(generics.ListAPIView):
 class UserBorrowRequestView(CreateAPIView):
     serializer_class = UserBorrowRequestSerializer
     permission_classes = [IsAuthenticated]
+    queryset = BaseRequestModel.objects.all()
 
     def perform_create(self, serializer):
         book_id = self.kwargs.get('pk')
         book = get_object_or_404(Book, pk=book_id)
+        has_pending_request = BaseRequestModel.objects.filter(
+            user=self.request.user,
+            book=book,
+            status='pending'
+        ).exists()
+        if has_pending_request:
+            raise ValidationError("! شما یک در خواست در حال بررسی دارید")
         serializer.save(
             book=book,
             user=self.request.user,
@@ -158,10 +166,18 @@ class UserBorrowRequestView(CreateAPIView):
 class UserExtensionRequestView(CreateAPIView):
     serializer_class = UserExtensionRequestSerializer
     permission_classes = [IsAuthenticated]
+    queryset = BaseRequestModel.objects.all()
 
     def perform_create(self, serializer):
         book_id = self.kwargs.get('pk')
         book = get_object_or_404(Book, pk=book_id)
+        has_pending_request = BaseRequestModel.objects.filter(
+            user=self.request.user,
+            book=book,
+            status='pending'
+        ).exists()
+        if has_pending_request:
+            raise ValidationError("! شما یک درخواست در حال بررسی دارید")
         serializer.save(
             book=book,
             user=self.request.user,
@@ -181,10 +197,19 @@ class UserExtensionRequestView(CreateAPIView):
 class UserReturnRequestView(CreateAPIView):
     serializer_class = UserReturnRequestSerializer
     permission_classes = [IsAuthenticated]
+    queryset = BaseRequestModel.objects.all()
 
     def perform_create(self, serializer):
         book_id = self.kwargs.get('pk')
         book = get_object_or_404(Book, pk=book_id)
+
+        has_pending_request = BaseRequestModel.objects.filter(
+            user=self.request.user,
+            book=book,
+            status='pending'
+        ).exists()
+        if has_pending_request:
+            raise ValidationError("! شما یک درخواست در حال بررسی دارید")
         serializer.save(
             book=book,
             user=self.request.user,
@@ -262,8 +287,9 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
         book = return_request.book
         book.count += 1
         book.save()
-        borrow_request = BorrowRequest.objects.get(user=user, book=book)
+        borrow_request = BorrowRequest.objects.filter(user=user, book=book).last()
         borrow_request.end_date = timezone.now()
+        borrow_request.is_finished = True
         borrow_request.save()
 
     def handle_rejection(self, request):

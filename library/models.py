@@ -1,10 +1,8 @@
 from django.db import models
 from django.utils import timezone
 
-
 from core.models import BaseModel
 from core.models import Profile
-
 
 
 # Create your models here.
@@ -136,6 +134,7 @@ class BorrowRequest(BaseRequestModel):
     time = models.IntegerField(choices=TIME_CHOICES, verbose_name="مدت زمان امانت")
     start_date = models.DateTimeField(null=True, blank=True, verbose_name='تاریخ شروع امانت')
     end_date = models.DateTimeField(null=True, blank=True, verbose_name='تاریخ پایان امانت')
+    is_finished = models.BooleanField(default=False, verbose_name='تمام شده')
 
     class Meta:
         verbose_name = "درخواست امانت"

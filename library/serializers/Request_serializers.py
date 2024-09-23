@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from library.models import BorrowRequest, Book, ExtensionRequest, ReviewRequest, ReturnRequest, BaseRequestModel
 from library.serializers.book_serializers import SimpleBookSerializer
@@ -91,10 +92,10 @@ class UserBorrowRequestSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         book = self.context['view'].kwargs.get('pk')
 
-        if BorrowRequest.objects.filter(user=user, book_id=book, status='accepted').exists():
-            raise serializers.ValidationError("!این کتاب را شما در حال حاظر در اختیار دارید")
-        elif BorrowRequest.objects.filter(user=user, book_id=book, status='pending').exists():
-            raise serializers.ValidationError("!شما یک درخواست درحال بررسی دارید")
+        if BorrowRequest.objects.filter(user=user, book=book, status='pending').exists():
+            raise ValidationError("! شما یک در خواست امانت در جریان دارید, منتظر تعیین وضعیت ادمین باشید")
+        elif BorrowRequest.objects.filter(user=user, book=book, is_finished=False).exists():
+            raise ValidationError("! شما این کتاب را در اختیار دارید")
         return data
 
 
@@ -161,7 +162,7 @@ class UserReturnRequestSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         book = self.context['view'].kwargs.get('pk')
 
-        if not BorrowRequest.objects.filter(user=user, book_id=book, status='accepted').exists():
+        if not BorrowRequest.objects.filter(user=user, book_id=book, is_finished=False).exists():
             raise serializers.ValidationError("!شما نمیتوانید کتابی که به امانت نبردید را تحویل دهید")
         elif ReturnRequest.objects.filter(user=user, book_id=book, status='pending').exists():
             raise serializers.ValidationError("!شما یک درخواست تحویل در جریان دارید")
