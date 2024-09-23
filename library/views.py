@@ -207,7 +207,7 @@ class AdminRequestView(ListAPIView):
     search_fields = ['status']
 
     def get_queryset(self):
-        queryset = BaseRequestModel.objects.all()
+        queryset = BaseRequestModel.objects.select_related('user', 'book').all()
         return queryset.order_by('-created_at')
 
 
@@ -387,7 +387,10 @@ class AvailableRemainderView(CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            response_data = {
+                'message': ".درخواست موجود شد به من اطلاع بده با موفقیت ایجاد شد"
+            }
+            return Response(response_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
