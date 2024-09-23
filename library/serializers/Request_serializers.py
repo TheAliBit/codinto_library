@@ -23,7 +23,6 @@ class BorrowRequestSerializer(serializers.ModelSerializer):
         ]
 
     def get_start_date(self, obj):
-        print(obj.start_date, 'start date')
         return obj.start_date
 
     def get_type(self, obj):
@@ -120,9 +119,9 @@ class ViewReturnRequestSerializer(serializers.ModelSerializer):
     # def validate(self, value):
     #     valid_status = ['accepted', 'pending']
     #     if value not in valid_status:
-    #         print('1')
+    #         
     #         raise serializers.ValidationError("!وضعیت برای درخواست تحویل نمیتواند رد شود")
-    #     print('1')
+    #     
     #     return value
 
 
@@ -151,10 +150,13 @@ class UserExtensionRequestSerializer(serializers.ModelSerializer):
 
 
 class UserReturnRequestSerializer(serializers.ModelSerializer):
+    score = serializers.IntegerField(required=True, label="امتیاز")
+    description = serializers.CharField(required=False, label="متن نظر")
+
     class Meta:
         model = ReturnRequest
         fields = [
-            'id', 'status', 'type'
+            'id', 'status', 'type', 'score', 'description'
         ]
         read_only_fields = ['status', 'type']
 
@@ -164,11 +166,21 @@ class UserReturnRequestSerializer(serializers.ModelSerializer):
 
         if not BorrowRequest.objects.filter(user=user, book_id=book, is_finished=False).exists():
             raise serializers.ValidationError("!شما نمیتوانید کتابی که به امانت نبردید را تحویل دهید")
+
         elif ReturnRequest.objects.filter(user=user, book_id=book, status='pending').exists():
             raise serializers.ValidationError("!شما یک درخواست تحویل در جریان دارید")
+
         elif ReturnRequest.objects.filter(user=user, book_id=book, status='accpeted').exists():
             raise serializers.ValidationError("! شما یکبار این کتاب را تحویل دادید")
+
+        elif BaseRequestModel.objects.filter(user=user, book=book, status='pending').exists():
+            raise ValidationError("! شما یک درخواست در حال بررسی دارید")
         return data
+
+    def validate_score(self, value):
+        if value < 0 or value > 5:
+            raise ValidationError("بازه امتیاز از 1 تا 5 است!")
+        return value
 
 
 class BaseRequestSerializer(serializers.ModelSerializer):

@@ -38,7 +38,7 @@ class ContactsAsync:
         # st = time.time()
         loop.run_until_complete(future)
         loop.run_until_complete(transport.session.close())
-        # print("time: %.2f" % (time.time() - st))
+        # 
         return result
 
     def add_group(self, groupName, Descriptions, showToChilds):

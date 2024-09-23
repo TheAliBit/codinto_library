@@ -73,7 +73,7 @@ class BookListSerializerForAdmin(serializers.ModelSerializer):
 
     def validate_publication_year(self, value):
         current_shamsi_year = jdatetime.datetime.now().year
-        print(current_shamsi_year)
+        
         if value < 1300:
             raise ValidationError("! تاریخ انتشار نمیتواند زمانی قبل تر از سال 1300 باشد")
         elif value > current_shamsi_year:

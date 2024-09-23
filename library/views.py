@@ -202,14 +202,18 @@ class UserReturnRequestView(CreateAPIView):
     def perform_create(self, serializer):
         book_id = self.kwargs.get('pk')
         book = get_object_or_404(Book, pk=book_id)
+        score = serializer.validated_data.pop('score', None)
+        description = serializer.validated_data.pop('description', None)
 
-        has_pending_request = BaseRequestModel.objects.filter(
+        ReviewRequest.objects.create(
+            score=score,
+            description=description,
             user=self.request.user,
+            type='review',
             book=book,
             status='pending'
-        ).exists()
-        if has_pending_request:
-            raise ValidationError("! شما یک درخواست در حال بررسی دارید")
+        )
+
         serializer.save(
             book=book,
             user=self.request.user,
