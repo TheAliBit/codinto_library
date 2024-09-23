@@ -38,3 +38,11 @@ class SimpleReviewSerializer(serializers.ModelSerializer):
 
     def get_type(self, obj):
         return "review_request"
+
+
+class ReviewsSerializerForBooks(serializers.ModelSerializer):
+    class Meta:
+        model = ReviewRequest
+        fields = [
+            'id', 'score', 'description'
+        ]

@@ -4,8 +4,8 @@ from rest_framework.routers import DefaultRouter
 from library.views import CategoryViewSet, HomePageAPIView, BookViewSet, SearchListAPIView, UserReviewListView, \
     UserReviewDetailView, DetailedBookView, RequestsListView, UserBorrowRequestView, AdminRequestView, \
     AdminSingleRequestView, AdminBookView, AdminSingleBookView, UserExtensionRequestView, UserReturnRequestView, \
-    UserMyBookView, UserNotificationList, AdminNotificationView, UserReviewView, AvailableRemainderView, \
-    BorrowHistoryView
+    UserMyBookView, UserNotificationList, AdminNotificationView, AvailableRemainderView, \
+    BorrowHistoryView, BookReviewsForUser
 
 router = DefaultRouter()
 
@@ -21,7 +21,7 @@ urlpatterns = [
     path('user/books/<int:pk>/extension/', UserExtensionRequestView.as_view(),
          name='user-extension-request'),
     path('user/books/<int:pk>/return/', UserReturnRequestView.as_view()),
-    path('user/books/<int:pk>/review/', UserReviewView.as_view(), name='user-review'),
+    path('user/books/<int:pk>/reviews/', BookReviewsForUser.as_view(), name='user-review'),
     path('user/books/<int:pk>/available/', AvailableRemainderView.as_view(),
          name='book-available-remainder'),
     path('user/my-books/', UserMyBookView.as_view(), name='user-my-books'),

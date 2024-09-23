@@ -25,7 +25,7 @@ class UserCreateReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReviewRequest
         fields = [
-            'id', 'score', 'description', 'status'
+            'id', 'score', 'description',
         ]
         read_only_fields = ['status']
 

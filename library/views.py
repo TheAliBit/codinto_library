@@ -25,7 +25,7 @@ from .serializers.Request_serializers import UserRequestSerializer, \
     UserBorrowRequestSerializer, UserExtensionRequestSerializer, UserReturnRequestSerializer, BaseRequestSerializer
 from .serializers.admin_serializers import AdminRequestSerializer, AdminNotificationSerializer, BorrowHistorySerializer
 from .serializers.notif_serializerss import UserNotificationSerializer
-from .serializers.review_serializers import DetailedReviewSerializer
+from .serializers.review_serializers import DetailedReviewSerializer, ReviewsSerializerForBooks
 from .serializers.user_serializers import UserCreateReviewSerializer
 
 
@@ -434,5 +434,12 @@ class BorrowHistoryView(ListAPIView):
     def get_queryset(self):
         return BorrowRequest.objects.filter(status='accepted')
 
-# class AdminCategoryView(CreateAPIView, UpdateAPIView, DestroyAPIView):
-#     serializer_class =
+
+
+class BookReviewsForUser(ListAPIView):
+    serializer_class = ReviewsSerializerForBooks
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        book_id = self.kwargs.get('pk')
+        return ReviewRequest.objects.filter(book_id=book_id, status='accepted').order_by('-created_at')
