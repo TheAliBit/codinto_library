@@ -62,13 +62,13 @@ class AdminNotificationSerializer(serializers.ModelSerializer):
 class HistoryUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['username']
+        fields = ['id', 'username']
 
 
 class HistoryBookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
-        fields = ['title', 'image']
+        fields = ['id', 'title', 'image']
 
 
 class BorrowHistorySerializer(serializers.ModelSerializer):
