@@ -150,8 +150,8 @@ class UserExtensionRequestSerializer(serializers.ModelSerializer):
 
 
 class UserReturnRequestSerializer(serializers.ModelSerializer):
-    score = serializers.IntegerField(required=True, label="امتیاز")
-    description = serializers.CharField(required=False, label="متن نظر")
+    score = serializers.IntegerField(required=True, label="امتیاز", write_only=True)
+    description = serializers.CharField(required=False, label="متن نظر", write_only=True)
 
     class Meta:
         model = ReturnRequest
