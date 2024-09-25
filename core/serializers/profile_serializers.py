@@ -17,6 +17,15 @@ class ProfileSerializer(serializers.ModelSerializer):
         result['picture'] = settings.DOMAIN + instance.picture.url if instance.picture else None
         return result
 
+    def validate_phone_number(self, value):
+        if len(value) != 11:
+            raise ValidationError("! شماره تلفن باید متشکل از 11 عدد باشد")
+
+        if not value.startswith('09'):
+            raise ValidationError("! شماره تلفن باید با 09 شروع شود")
+
+        return value
+
 
 class AdminListProfileSerializer(serializers.ModelSerializer):
     phone_number = serializers.CharField(max_length=11,
@@ -43,8 +52,15 @@ class AdminListProfileSerializer(serializers.ModelSerializer):
         return value
 
     def validate_phone_number(self, value):
+        if len(value) != 11:
+            raise ValidationError("! شماره تلفن باید متشکل از 11 عدد باشد")
+
+        if not value.startswith('09'):
+            raise ValidationError("! شماره تلفن باید با 09 شروع شود")
+
         if Profile.objects.filter(phone_number=value).exists():
             raise ValidationError("!کاربری با این شماره تلفن وجود دارد")
+
         return value
 
     def validate_telegram_id(self, value):
@@ -73,8 +89,15 @@ class AdminSingleProfileSerializer(serializers.ModelSerializer):
         return value
 
     def validate_phone_number(self, value):
+        if len(value) != 11:
+            raise ValidationError("! شماره تلفن باید متشکل از 11 عدد باشد")
+
+        if not value.startswith('09'):
+            raise ValidationError("! شماره تلفن باید با 09 شروع شود")
+
         if value and Profile.objects.filter(phone_number=value).exclude(id=self.instance.id).exists():
             raise ValidationError("!این شماره تلفن مربوط به یک پروفایل دیگر است")
+
         return value
 
     def validate_telegram_id(self, value):
