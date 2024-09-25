@@ -236,7 +236,8 @@ class AdminRequestView(ListAPIView):
     search_fields = ['status']
 
     def get_queryset(self):
-        queryset = BaseRequestModel.objects.select_related('user', 'book').all()
+        queryset = BaseRequestModel.objects.select_related('user', 'book', 'borrowrequest', 'extensionrequest',
+                                                           'returnrequest', 'reveiwrequest').all()
         return queryset.order_by('-created_at')
 
 
@@ -433,7 +434,6 @@ class BorrowHistoryView(ListAPIView):
 
     def get_queryset(self):
         return BorrowRequest.objects.filter(status='accepted')
-
 
 
 class BookReviewsForUser(ListAPIView):
