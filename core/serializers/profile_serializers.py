@@ -11,6 +11,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ['id', 'username', 'password', 'first_name', 'last_name', 'phone_number', 'email', 'telegram_id',
                   'picture']
+        extra_kwargs = {'password': {'write_only': True}}
 
     def to_representation(self, instance):
         result = super().to_representation(instance)
@@ -23,6 +24,9 @@ class ProfileSerializer(serializers.ModelSerializer):
 
         if not value.startswith('09'):
             raise ValidationError("! شماره تلفن باید با 09 شروع شود")
+
+        if Profile.objects.filter(phone_number=value).exists():
+            raise ValidationError("! کاربری با این شماره تلفن وجود دارد")
 
         return value
 
