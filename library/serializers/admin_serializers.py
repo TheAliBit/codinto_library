@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from core.models import Profile
 from library.models import BaseRequestModel, Notification, BorrowRequest, Book, ReturnRequest
-from library.serializers.book_serializers import FullBookSerializerForAdminRequest
+from library.serializers.book_serializers import  FullBookSerializerForAdminRequests
 from library.serializers.review_serializers import SimpleReviewSerializer
 from library.serializers.user_serializers import FullUserSerializer
 from library.serializers.Request_serializers import BorrowRequestSerializer, ExtensionRequestSerializer, \
@@ -11,7 +11,7 @@ from library.serializers.Request_serializers import BorrowRequestSerializer, Ext
 
 class AdminRequestSerializer(serializers.ModelSerializer):
     user = FullUserSerializer(read_only=True)
-    book = FullBookSerializerForAdminRequest(read_only=True)
+    book = FullBookSerializerForAdminRequests(read_only=True)
     request_detail = serializers.SerializerMethodField()
 
     class Meta:

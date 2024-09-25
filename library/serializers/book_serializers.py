@@ -2,6 +2,13 @@ from rest_framework import serializers
 from library.models import Book
 from library.utils import calculate_end_date
 
+class FullBookSerializerForAdminRequests(serializers.ModelSerializer):
+    class Meta:
+        model = Book
+        fields = [
+            'id', 'title', 'image'
+        ]
+
 class FullBookSerializerForAdminRequest(serializers.ModelSerializer):
     category = serializers.CharField(source='category.title', read_only=True)
     count = serializers.SerializerMethodField()
