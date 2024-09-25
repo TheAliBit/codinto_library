@@ -3,6 +3,8 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView,
 from rest_framework.permissions import AllowAny, IsAdminUser
 from django.db import transaction
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+
+from .permissions import IsNotSelf
 from .utils import black_list_refresh_token, get_access_from_refresh
 from core.serializers.registration_serializers import LoginSerializer, RefreshSerializer
 from core.serializers.profile_serializers import ProfileSerializer, AdminSingleProfileSerializer
@@ -97,7 +99,7 @@ class AdminListProfileView(ListAPIView, CreateAPIView):
 
 class AdminSingleProfileView(RetrieveAPIView, UpdateAPIView, DestroyAPIView):
     serializer_class = AdminSingleProfileSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAuthenticated, IsAdminUser, IsNotSelf]
 
     def get_queryset(self):
         return Profile.objects.all()
