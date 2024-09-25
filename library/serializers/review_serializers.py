@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from core.models import Profile
+from core.utils import User
 from library.models import ReviewRequest
 from library.serializers.book_serializers import SimpleBookSerializer
 
@@ -40,9 +42,19 @@ class SimpleReviewSerializer(serializers.ModelSerializer):
         return "review_request"
 
 
+class UserNameAndImageForReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = [
+            'picture', 'first_name', 'last_name'
+        ]
+
+
 class ReviewsSerializerForBooks(serializers.ModelSerializer):
+    user = UserNameAndImageForReviewSerializer(read_only=True)
+
     class Meta:
         model = ReviewRequest
         fields = [
-            'id', 'score', 'description'
+            'id', 'score', 'description', 'user'
         ]
