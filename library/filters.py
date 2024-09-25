@@ -31,15 +31,15 @@ class CustomBookFilterSet(filters.FilterSet):
 
     def filter_by_type(self, queryset, name, value):
         if value == 'latest':
-            return queryset.order_by('-created_at')[:10]
+            return queryset.order_by('-created_at')
         elif value == 'popular':
             return queryset.annotate(
                 borrow_requests_count=Count('requests', filter=Q(requests__borrowrequest__isnull=False)),
-            ).order_by('-borrow_requests_count')[:10]
+            ).order_by('-borrow_requests_count')
         elif value == 'most_popular':
             return queryset.annotate(
                 review_requests_count=Count('requests', filter=Q(requests__reviewrequest__isnull=False)),
-            ).order_by('-review_requests_count')[:10]
+            ).order_by('-review_requests_count')
         return queryset
 
 
