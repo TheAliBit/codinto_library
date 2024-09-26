@@ -1,6 +1,21 @@
 from rest_framework import serializers
-from codinto_library import settings
 from library.models import Category
+
+
+class SimpleCategoryListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'title', 'parent']
+
+    def validate_parent(self, value):
+        if value and value == self.instance.parent:
+            raise serializers.ValidationError('! کتگوری نمی تواند زیرکتگوری خودش باشد')
+        return value
+
+    def validate_title(self, value):
+        if value and value == self.instance.title:
+            raise serializers.ValidationError('! عنوان کتگوری تکراری است')
+        return value
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -17,9 +32,15 @@ class CategorySerializer(serializers.ModelSerializer):
             return CategorySerializer(children, many=True).data
         return None
 
-    # Custom validation
-    def validate(self, data):
-        title = data.get('title')
-        if Category.objects.filter(title=title).exists():
-            raise serializers.ValidationError({'message': '!دسته بندی تکراری است'})
-        return data
+    # # Custom validation
+    # def validate(self, data):
+    #     title = data.get('title')
+    #     if Category.objects.filter(title=title).exists():
+    #         raise serializers.ValidationError({'message': '!دسته بندی تکراری است'})
+    #     return data
+
+
+class SingleCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'title', 'parent']

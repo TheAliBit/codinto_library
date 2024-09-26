@@ -5,6 +5,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
 from rest_framework import status
 from rest_framework import viewsets
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import DestroyAPIView, UpdateAPIView, RetrieveAPIView, CreateAPIView, \
@@ -12,11 +13,11 @@ from rest_framework.generics import DestroyAPIView, UpdateAPIView, RetrieveAPIVi
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
 
 from library.filters import CustomBookFilterSet, CustomBorrowHistoryFilter
 from library.serializers.book_serializers import FullBookSerializer, SingleBookUserSerializer
-from library.serializers.category_serializers import CategorySerializer
+from library.serializers.category_serializers import CategorySerializer, SimpleCategoryListSerializer, \
+    SingleCategorySerializer
 from library.serializers.home_page_serializers import BookSerializer, BookSerializerForAdmin, \
     BookListSerializerForAdmin, BookAvailableRemainderSerializer
 from .models import Book, Category, ReviewRequest, BorrowRequest, ExtensionRequest, BaseRequestModel, Notification, \
@@ -29,7 +30,7 @@ from .serializers.review_serializers import DetailedReviewSerializer, ReviewsSer
 from .serializers.user_serializers import UserCreateReviewSerializer
 
 
-class CategoryViewSet(ModelViewSet):
+class CategoryView(ListAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Category.objects.order_by('id')
     serializer_class = CategorySerializer
@@ -42,6 +43,20 @@ class CategoryViewSet(ModelViewSet):
             queryset = queryset.filter(parent__isnull=True)
         return queryset.prefetch_related('children')
 
+class SimpleCategoryList(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Category.objects.order_by('id')
+    serializer_class = SimpleCategoryListSerializer
+    filterset_fields = ['parent']
+
+class SingleCategoryView(RetrieveAPIView,DestroyAPIView,UpdateAPIView):
+    serializer_class = SingleCategorySerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        cateogry_id = self.kwargs.get('pk')
+        category = get_object_or_404(Category,pk=cateogry_id)
+        return Category.objects.get(category=category)
 
 class BookViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Book.objects.order_by('id')
@@ -237,7 +252,7 @@ class AdminRequestView(ListAPIView):
 
     def get_queryset(self):
         queryset = BaseRequestModel.objects.select_related('user', 'book', 'borrowrequest', 'extensionrequest',
-                                                           'returnrequest', 'reveiwrequest').all()
+                                                           'returnrequest', 'reviewrequest').all()
         return queryset.order_by('-created_at')
 
 
@@ -298,7 +313,7 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
         borrow_request.save()
 
     def handle_rejection(self, request):
-        # i added here for myself, it's not important
+        # I added here for myself, it's not important
         pass
 
     def create_notification(self, request):
@@ -443,3 +458,23 @@ class BookReviewsForUser(ListAPIView):
     def get_queryset(self):
         book_id = self.kwargs.get('pk')
         return ReviewRequest.objects.filter(book_id=book_id, status='accepted').order_by('-created_at')
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return SimpleCategoryListSerializer
+        elif self.action == 'nested':
+            return CategorySerializer
+        return SimpleCategoryListSerializer
+
+    def list(self,request,*args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @action(detail=False, methods=['get'], url_path='nested')
+    def nested(self, request):
+        categories = Category.objects.filter(parent=None)
+        serializer = self.get_serializer(categories, many=True)
+        return Response(serializer.data)

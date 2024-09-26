@@ -1,13 +1,14 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from library.views import CategoryViewSet, HomePageAPIView, BookViewSet, SearchListAPIView, UserReviewListView, \
+from library.views import CategoryView, HomePageAPIView, BookViewSet, SearchListAPIView, UserReviewListView, \
     UserReviewDetailView, DetailedBookView, RequestsListView, UserBorrowRequestView, AdminRequestView, \
     AdminSingleRequestView, AdminBookView, AdminSingleBookView, UserExtensionRequestView, UserReturnRequestView, \
     UserMyBookView, UserNotificationList, AdminNotificationView, AvailableRemainderView, \
-    BorrowHistoryView, BookReviewsForUser
+    BorrowHistoryView, BookReviewsForUser, CategoryViewSet
 
 router = DefaultRouter()
+router.register(r'category', CategoryViewSet, basename='category')
 
 urlpatterns = [
     path('user/home/', HomePageAPIView.as_view(), name='home'),
@@ -34,5 +35,9 @@ urlpatterns = [
     path('super-user/books/<int:pk>/', AdminSingleBookView.as_view(), name='admin-single-request'),
     path('super-user/notifications/', AdminNotificationView.as_view(), name='admin-creat-notifications'),
     path('super-user/history/',BorrowHistoryView.as_view(), name ='borrow_history'),
-    path('super-user/category/', CategoryViewSet.as_view({'get': 'list', 'post': 'create'}),  name='category-list'),
+    # path('super-user/categories/', SimpleCategoryList.as_view(),  name='category-list'),
+    # path('super-user/categories/nested-categories/', CategoryView.as_view(),  name='category-list'),
+    # path('super-user/categories/<int:pk>/', SingleCategoryView.as_view(),  name='category-list'),
+    # path('super-user/categories/nested-categories/<int:pk>/', SingleCategoryView.as_view(),  name='category-list'),
+
 ] + router.urls
