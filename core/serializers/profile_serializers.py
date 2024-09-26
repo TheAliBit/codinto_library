@@ -30,6 +30,21 @@ class ProfileSerializer(serializers.ModelSerializer):
 
         return value
 
+    def create(self, validated_data):
+        passwrod = validated_data.pop('password')
+        user = Profile(**validated_data)
+        user.set_password(passwrod)
+        user.save()
+        return user
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        instance = super().update(instance, validated_data)
+        if password:
+            instance.set_password(password)
+            instance.save()
+        return instance
+
 
 class AdminListProfileSerializer(serializers.ModelSerializer):
     phone_number = serializers.CharField(max_length=11,
@@ -81,6 +96,7 @@ class AdminSingleProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ['id', 'username', 'password', 'first_name', 'last_name', 'phone_number', 'email', 'telegram_id']
+        extra_kwargs = {'password': {'write_only': True}}
 
     def validate_username(self, value):
         if value and Profile.objects.filter(username=value).exclude(id=self.instance.id).exists():
@@ -108,3 +124,18 @@ class AdminSingleProfileSerializer(serializers.ModelSerializer):
         if value and Profile.objects.filter(telegram_id=value).exclude(id=self.instance.id).exists():
             raise ValidationError("!این آیدی برای شخص دیگریست")
         return value
+
+    def create(self, validated_data):
+        passwrod = validated_data.pop('password')
+        user = Profile(**validated_data)
+        user.set_password(passwrod)
+        user.save()
+        return user
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        instance = super().update(instance, validated_data)
+        if password:
+            instance.set_password(password)
+            instance.save()
+        return instance
