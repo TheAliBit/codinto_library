@@ -2,7 +2,6 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from core.models import Profile
-from core.utils import User
 from library.models import ReviewRequest
 from library.serializers.book_serializers import SimpleBookSerializer
 
@@ -56,5 +55,6 @@ class ReviewsSerializerForBooks(serializers.ModelSerializer):
     class Meta:
         model = ReviewRequest
         fields = [
+
             'id', 'score', 'description', 'user'
         ]
