@@ -366,7 +366,7 @@ class UserNotificationList(ListAPIView):
         user = self.request.user
         return Notification.objects.filter(
             Q(user=user) or Q(user__is_superuser=True)
-        ).order_by('-created_at')
+        ).exclude(Q(title="")).order_by('-created_at')
 
 
 class AdminNotificationView(ListAPIView, CreateAPIView):
