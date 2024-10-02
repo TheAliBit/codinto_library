@@ -35,9 +35,4 @@ urlpatterns = [
     path('super-user/books/<int:pk>/', AdminSingleBookView.as_view(), name='admin-single-request'),
     path('super-user/notifications/', AdminNotificationView.as_view(), name='admin-creat-notifications'),
     path('super-user/history/',BorrowHistoryView.as_view(), name ='borrow_history'),
-    # path('super-user/categories/', SimpleCategoryList.as_view(),  name='category-list'),
-    # path('super-user/categories/nested-categories/', CategoryView.as_view(),  name='category-list'),
-    # path('super-user/categories/<int:pk>/', SingleCategoryView.as_view(),  name='category-list'),
-    # path('super-user/categories/nested-categories/<int:pk>/', SingleCategoryView.as_view(),  name='category-list'),
-
 ] + router.urls

@@ -43,20 +43,23 @@ class CategoryView(ListAPIView):
             queryset = queryset.filter(parent__isnull=True)
         return queryset.prefetch_related('children')
 
+
 class SimpleCategoryList(ListAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Category.objects.order_by('id')
     serializer_class = SimpleCategoryListSerializer
     filterset_fields = ['parent']
 
-class SingleCategoryView(RetrieveAPIView,DestroyAPIView,UpdateAPIView):
+
+class SingleCategoryView(RetrieveAPIView, DestroyAPIView, UpdateAPIView):
     serializer_class = SingleCategorySerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
         cateogry_id = self.kwargs.get('pk')
-        category = get_object_or_404(Category,pk=cateogry_id)
+        category = get_object_or_404(Category, pk=cateogry_id)
         return Category.objects.get(category=category)
+
 
 class BookViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Book.objects.order_by('id')
@@ -79,13 +82,17 @@ class HomePageAPIView(APIView):
         newest_books_data = BookSerializer(newest_books, many=True).data
 
         most_popular_books = Book.objects.annotate(
-            borrow_requests_count=Count('requests', filter=Q(requests__borrowrequest__isnull=False)),
+            borrow_requests_count=Count('requests', filter=Q(
+                requests__borrowrequest__isnull=False)),
         ).order_by('-borrow_requests_count', )[:10]
-        most_popular_books_data = BookSerializer(most_popular_books, many=True).data
+        most_popular_books_data = BookSerializer(
+            most_popular_books, many=True).data
         most_reviewed_books = Book.objects.annotate(
-            review_requests_count=Count('requests', filter=Q(requests__reviewrequest__isnull=False)),
+            review_requests_count=Count('requests', filter=Q(
+                requests__reviewrequest__isnull=False)),
         ).order_by('-review_requests_count')[:10]
-        most_reviewed_books_data = BookSerializer(most_reviewed_books, many=True).data
+        most_reviewed_books_data = BookSerializer(
+            most_reviewed_books, many=True).data
 
         data = {
             'newest_books': newest_books_data,
@@ -295,7 +302,8 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
             borrow_request = BorrowRequest.objects.get(id=request.id)
             borrow_request.status = 'pending'
             borrow_request.save()
-            raise ValidationError("نسخه ای از این کتاب در حال حاظر موجود نمی باشد")
+            raise ValidationError(
+                "نسخه ای از این کتاب در حال حاظر موجود نمی باشد")
 
     def handle_extension_request(self, request):
         extension_request = ExtensionRequest.objects.get(id=request.id)
@@ -307,7 +315,8 @@ class AdminSingleRequestView(RetrieveAPIView, UpdateAPIView):
         book = return_request.book
         book.count += 1
         book.save()
-        borrow_request = BorrowRequest.objects.filter(user=user, book=book).last()
+        borrow_request = BorrowRequest.objects.filter(
+            user=user, book=book).last()
         borrow_request.end_date = timezone.now()
         borrow_request.is_finished = True
         borrow_request.save()
@@ -335,7 +344,8 @@ class AdminBookView(ListAPIView, CreateAPIView):
     search_fields = ['title']
 
     def get_queryset(self):
-        queryset = Book.objects.select_related('category__parent__parent').all()
+        queryset = Book.objects.select_related(
+            'category__parent__parent').all()
         return queryset.order_by('-created_at')
 
 
@@ -459,6 +469,7 @@ class BookReviewsForUser(ListAPIView):
         book_id = self.kwargs.get('pk')
         return ReviewRequest.objects.filter(book_id=book_id, status='accepted').order_by('-created_at')
 
+
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
@@ -470,7 +481,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
             return CategorySerializer
         return SimpleCategoryListSerializer
 
-    def list(self,request,*args, **kwargs):
+    def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
     @action(detail=False, methods=['get'], url_path='nested')
