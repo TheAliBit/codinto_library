@@ -2,7 +2,7 @@ from model_bakery import baker
 from rest_framework import status
 import pytest
 
-from library.models import ReviewRequest, Book
+from library.models import ReviewRequest, Book, BorrowRequest
 
 
 @pytest.fixture
@@ -75,6 +75,30 @@ def user_post_borrow_request(api_client):
         return api_client.post(f'/user/books/{book_id}/borrow/', data)
 
     return user_post_borrow
+
+
+@pytest.fixture
+def user_get_requests(api_client):
+    def get_requests():
+        return api_client.get('/user/requests/')
+
+    return get_requests
+
+
+@pytest.fixture
+def user_post_extension_request(api_client):
+    def user_post_extension(book_id, data):
+        return api_client.post(f'/user/books/{book_id}/extension/', data)
+
+    return user_post_extension
+
+
+@pytest.fixture
+def user_post_return_request(api_client):
+    def user_post_return(book_id, data):
+        return api_client.post(f'/user/books/{book_id}/return/', data=data)
+
+    return user_post_return
 
 
 @pytest.mark.django_db
@@ -260,4 +284,97 @@ class TestPostCreateUserBorrowRequest:
         }
         response = user_post_borrow_request(book_id=book.id, data=data)
 
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+class TestGetUserRequests:
+    def test_if_user_is_annonymous_returns_401(self, user_get_requests):
+        response = user_get_requests()
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_if_user_is_authenticated(self, user, api_client, user_get_requests):
+        api_client.force_authenticate(user=user)
+        response = user_get_requests()
+
+        assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
+class TestPostCreateUserExtensionRequest:
+    def test_if_user_is_annonymous_returns_401(self, user_post_extension_request):
+        response = user_post_extension_request(book_id=1, data={})
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_if_user_is_authenticated_create_extension_returns_201(self, api_client, user, user_post_extension_request):
+        api_client.force_authenticate(user=user)
+        book = baker.make(Book)
+
+        baker.make(BorrowRequest, user=user, book=book, time=3, status='accepted')
+
+        data = {
+            'user': user.id,
+            'book': book.id,
+            'type': 'extension',
+            'time': 3,
+        }
+        response = user_post_extension_request(book_id=book.id, data=data)
+
+        assert response.status_code == status.HTTP_201_CREATED
+
+    def test_if_user_is_authenticate_but_data_is_invalid_returns_400(self, user, api_client,
+                                                                     user_post_extension_request):
+        api_client.force_authenticate(user=user)
+        book = baker.make(Book)
+
+        baker.make(BorrowRequest, user=user, book=book, time=14, status='accepted')
+
+        data = {
+            'user': user.id,
+            'book': book.id,
+            'type': 'extension',
+            'time': 100,
+        }
+        response = user_post_extension_request(book_id=book.id, data=data)
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+class TestPostCreateUserReturnRequest:
+    def test_if_user_is_annonymous_returns_401(self, user_post_return_request):
+        response = user_post_return_request(book_id=1, data={})
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_if_user_is_authenticated_returns_201(self, user, api_client, user_post_return_request):
+        api_client.force_authenticate(user=user)
+        book = baker.make(Book)
+        baker.make(BorrowRequest, user=user, book=book, time=14, status='accepted')
+
+        post_data = {
+            'book': book.id,
+            'user': user.id,
+            'score': 5,
+            'description': 'test'
+        }
+
+        response = user_post_return_request(book_id=book.id, data=post_data)
+        assert response.status_code == status.HTTP_201_CREATED
+
+    def test_if_suer_is_authenticated_but_data_is_invalid_returns_400(self, user, api_client, user_post_return_request):
+        api_client.force_authenticate(user=user)
+        book = baker.make(Book)
+        baker.make(BorrowRequest, user=user, book=book, time=14, status='accepted')
+
+        post_data = {
+            'book': book.id,
+            'user': user.id,
+            'score': 8,
+            'description': 'test'
+        }
+
+        response = user_post_return_request(book_id=book.id, data=post_data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
