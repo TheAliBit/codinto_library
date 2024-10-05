@@ -44,7 +44,7 @@ class BookDetailSerializer(serializers.ModelSerializer):
 
 class BookListSerializerForAdmin(serializers.ModelSerializer):
     owner = serializers.PrimaryKeyRelatedField(queryset=Profile.objects.all())
-    count = serializers.SerializerMethodField()
+    # count = serializers.SerializerMethodField()
     # category = CategorySerializer(read_only=True)
     category_id = serializers.PrimaryKeyRelatedField(
         queryset=Category.objects.all(), write_only=True, source='category'
@@ -60,11 +60,11 @@ class BookListSerializerForAdmin(serializers.ModelSerializer):
         ]
         extra_kwargs = {'category': {'required': True}}
 
-    def get_count(self, obj):
-        if obj.count > 0:
-            return 'is_available'
-        else:
-            return 'is_not_available'
+    # def get_count(self, obj):
+    #     if obj.count > 0:
+    #         return 'is_available'
+    #     else:
+    #         return 'is_not_available'
 
     def validate_title(self, value):
         if Book.objects.filter(title=value).exists():
@@ -73,7 +73,7 @@ class BookListSerializerForAdmin(serializers.ModelSerializer):
 
     def validate_publication_year(self, value):
         current_shamsi_year = jdatetime.datetime.now().year
-        
+
         if value < 1300:
             raise ValidationError("! تاریخ انتشار نمیتواند زمانی قبل تر از سال 1300 باشد")
         elif value > current_shamsi_year:
