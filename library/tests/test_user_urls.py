@@ -69,6 +69,14 @@ def user_get_single_book(api_client):
     return get_single_book
 
 
+@pytest.fixture
+def user_post_borrow_request(api_client):
+    def user_post_borrow(book_id, data):
+        return api_client.post(f'/user/books/{book_id}/borrow/', data)
+
+    return user_post_borrow
+
+
 @pytest.mark.django_db
 class TestGetUserHomePage:
     def test_if_user_is_annonymous_returns_401(self, user_get_home_page):
@@ -218,3 +226,38 @@ class TestGetSingleBook:
         response = user_get_single_book(book_id=9999)
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+class TestPostCreateUserBorrowRequest:
+    def test_if_user_is_annonymous_returns_401(self, user_post_borrow_request):
+        response = user_post_borrow_request(book_id=1, data={})
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_if_user_is_authenticated_create_borrow_returns_201(self, api_client, user, user_post_borrow_request):
+        api_client.force_authenticate(user=user)
+        book = baker.make(Book)
+        data = {
+            'user': user.id,
+            'book': book.id,
+            'type': 'borrow',
+            'time': 14,
+        }
+        response = user_post_borrow_request(book_id=book.id, data=data)
+
+        assert response.status_code == status.HTTP_201_CREATED
+
+    def test_if_user_is_authenticate_but_data_is_invalid_returns_400(self, user, api_client, user_post_borrow_request):
+        api_client.force_authenticate(user=user)
+
+        book = baker.make(Book)
+        data = {
+            'user': user.id,
+            'book': book.id,
+            'type': 'borrow',
+            'time': 15,
+        }
+        response = user_post_borrow_request(book_id=book.id, data=data)
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
