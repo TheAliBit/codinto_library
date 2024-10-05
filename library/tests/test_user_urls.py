@@ -126,6 +126,22 @@ def user_get_my_books(api_client):
     return get_user_books
 
 
+@pytest.fixture
+def user_get_notifications(api_client):
+    def get_user_notifications():
+        return api_client.get('/user/notifications/')
+
+    return get_user_notifications
+
+
+@pytest.fixture
+def super_user_get_requests(api_client):
+    def get_requests():
+        return api_client.get('/super-user/requests/')
+
+    return get_requests
+
+
 @pytest.mark.django_db
 class TestGetUserHomePage:
     def test_if_user_is_annonymous_returns_401(self, user_get_home_page):
@@ -452,5 +468,39 @@ class TestGetUserMyBooks:
     def test_if_user_is_authenticated_returns_200(self, user, api_client, user_get_my_books):
         api_client.force_authenticate(user=user)
         response = user_get_my_books()
+
+        assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
+class TestGetUserNotifications:
+    def test_if_user_is_annonymous_returns_401(self, user_get_notifications):
+        response = user_get_notifications()
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_if_user_is_authentiacted_returns_200(self, user, api_client, user_get_notifications):
+        api_client.force_authenticate(user=user)
+        response = user_get_notifications()
+
+        assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
+class TestGetSuperUserRequests:
+    def test_if_user_is_annonymous_returns_401(self, super_user_get_requests):
+        response = super_user_get_requests()
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_if_user_is_not_admin_returns_403(self, user, api_client, super_user_get_requests):
+        api_client.force_authenticate(user=user)
+        response = super_user_get_requests()
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_if_user_is_admin_returns_200(self, staff_user, api_client, super_user_get_requests):
+        api_client.force_authenticate(user=staff_user)
+        response = super_user_get_requests()
 
         assert response.status_code == status.HTTP_200_OK

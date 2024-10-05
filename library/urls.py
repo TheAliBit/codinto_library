@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from library.views import CategoryView, HomePageAPIView, BookViewSet, SearchListAPIView, UserReviewListView, \
+from library.views import HomePageAPIView, BookViewSet, SearchListAPIView, UserReviewListView, \
     UserReviewDetailView, DetailedBookView, RequestsListView, UserBorrowRequestView, AdminRequestView, \
     AdminSingleRequestView, AdminBookView, AdminSingleBookView, UserExtensionRequestView, UserReturnRequestView, \
     UserMyBookView, UserNotificationList, AdminNotificationView, AvailableRemainderView, \
