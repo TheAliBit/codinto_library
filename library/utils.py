@@ -12,17 +12,19 @@ def calculate_end_date(request, book_id):
 
     try:
         borrow_request = BorrowRequest.objects.get(user=user, book=book, is_finished=False)
-        if borrow_request:
-            end_date = borrow_request.end_date
-            print(end_date)
+
+        end_date = borrow_request.end_date
+
+        # Check if end_date is None
+        if end_date is not None:
             today = timezone.now()
-            end_date = end_date
-            today = today
             remaining_days = (end_date - today).days
             return remaining_days
-        return None
+        else:
+            return None  # or some appropriate message indicating end_date is not set
     except BorrowRequest.DoesNotExist:
         return None
+
 
 # def calculate_end_date(request, book_id):
 #     book = get_object_or_404(Book, id=book_id)
