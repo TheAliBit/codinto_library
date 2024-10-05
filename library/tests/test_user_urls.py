@@ -1,6 +1,7 @@
 from model_bakery import baker
 from rest_framework import status
 import pytest
+from rest_framework.status import HTTP_401_UNAUTHORIZED
 
 from library.models import ReviewRequest, Book, BorrowRequest
 
@@ -99,6 +100,30 @@ def user_post_return_request(api_client):
         return api_client.post(f'/user/books/{book_id}/return/', data=data)
 
     return user_post_return
+
+
+@pytest.fixture
+def user_get_single_books_reviews(api_client):
+    def get_single_book_reviews(book_id):
+        return api_client.get(f'/user/books/{book_id}/reviews/')
+
+    return get_single_book_reviews
+
+
+@pytest.fixture
+def user_post_available_reminder_book_request(api_client):
+    def post_available_reminder_request(book_id, data):
+        return api_client.post(f'/user/books/{book_id}/available/', data=data)
+
+    return post_available_reminder_request
+
+
+@pytest.fixture
+def user_get_my_books(api_client):
+    def get_user_books():
+        return api_client.get('/user/my-books/')
+
+    return get_user_books
 
 
 @pytest.mark.django_db
@@ -378,3 +403,54 @@ class TestPostCreateUserReturnRequest:
 
         response = user_post_return_request(book_id=book.id, data=post_data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+class TestGetUserSingleBookReviews:
+    def test_if_user_is_annonymous_returtns_401(self, user_get_single_books_reviews):
+        response = user_get_single_books_reviews(book_id=1)
+
+        assert response.status_code == HTTP_401_UNAUTHORIZED
+
+    def test_if_user_is_authenticated_returns_200(self, user, api_client, user_get_single_books_reviews):
+        api_client.force_authenticate(user=user)
+        book = baker.make(Book)
+        response = user_get_single_books_reviews(book_id=book.id)
+
+        assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
+class TestUserPostAvailableReminderBookRequest:
+    def test_if_user_is_annonymous_returns_401(self, user_post_available_reminder_book_request):
+        response = user_post_available_reminder_book_request(book_id=99, data={})
+
+        assert response.status_code == HTTP_401_UNAUTHORIZED
+
+    def test_if_user_is_authenticated_returns_200(self, user, api_client, user_post_available_reminder_book_request):
+        api_client.force_authenticate(user=user)
+        book = baker.make(Book, count=0)
+        response = user_post_available_reminder_book_request(book_id=book.id, data={})
+
+        assert response.status_code == status.HTTP_201_CREATED
+
+    def test_if_user_is_authenticated_but_post_invalid_data_400(self, user, api_client,
+                                                                user_post_available_reminder_book_request):
+        api_client.force_authenticate(user=user)
+        response = user_post_available_reminder_book_request(book_id=600, data={})
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+class TestGetUserMyBooks:
+    def test_if_user_is_annonymous_returns_401(self, user_get_my_books):
+        response = user_get_my_books()
+
+        assert response.status_code == HTTP_401_UNAUTHORIZED
+
+    def test_if_user_is_authenticated_returns_200(self, user, api_client, user_get_my_books):
+        api_client.force_authenticate(user=user)
+        response = user_get_my_books()
+
+        assert response.status_code == status.HTTP_200_OK
