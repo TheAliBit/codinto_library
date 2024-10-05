@@ -47,6 +47,30 @@ def super_user_post_books(api_client):
     return post_books
 
 
+@pytest.fixture
+def super_user_get_single_book(api_client):
+    def get_single_book(book_id):
+        return api_client.get(f'/super-user/books/{book_id}/')
+
+    return get_single_book
+
+
+@pytest.fixture
+def super_user_delete_single_book(api_client):
+    def delete_single_book(book_id):
+        return api_client.delete(f'/super-user/books/{book_id}/')
+
+    return delete_single_book
+
+
+@pytest.fixture
+def super_user_update_single_book(api_client):
+    def update_single_book(book_id, data):
+        return api_client.put(f'/super-user/books/{book_id}/', data=data)
+
+    return update_single_book
+
+
 @pytest.mark.django_db
 class TestGetSuperUserRequests:
     def test_if_user_is_annonymous_returns_401(self, super_user_get_requests):
@@ -224,5 +248,173 @@ class TestPostSuperUserBooks:
 
         response = super_user_post_books(data=post_data)
 
-        print(response.data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+class TestGetSuperUserSingleBook:
+    def test_if_user_is_annonymous_returns_401(self, super_user_get_single_book):
+        response = super_user_get_single_book(book_id=1)
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_if_user_is_not_admin_returns_403(self, api_client, user, super_user_get_single_book):
+        api_client.force_authenticate(user=user)
+
+        response = super_user_get_single_book(book_id=1)
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_if_user_is_admin_returns_200(self, api_client, staff_user, super_user_get_single_book):
+        api_client.force_authenticate(user=staff_user)
+
+        book = baker.make(Book)
+        response = super_user_get_single_book(book_id=book.id)
+
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_if_user_is_admin_but_book_does_not_exists_returns_404(self, staff_user, api_client,
+                                                                   super_user_get_single_book):
+        api_client.force_authenticate(user=staff_user)
+        response = super_user_get_single_book(book_id=1)
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+class TestDeleteSuperUserSingleBook:
+    def test_if_user_is_annonymous_returns_401(self, super_user_delete_single_book):
+        response = super_user_delete_single_book(book_id=1)
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_if_user_is_not_admin_returns_403(self, user, api_client, super_user_delete_single_book):
+        api_client.force_authenticate(user=user)
+
+        response = super_user_delete_single_book(book_id=1)
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_if_user_is_admin_delete_returns_204(self, staff_user, api_client, super_user_delete_single_book):
+        api_client.force_authenticate(user=staff_user)
+
+        book = baker.make(Book)
+        response = super_user_delete_single_book(book_id=book.id)
+
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    def test_if_user_is_admin_but_book_does_not_exists_returns_404(self, api_client, staff_user,
+                                                                   super_user_delete_single_book):
+        api_client.force_authenticate(user=staff_user)
+        response = super_user_delete_single_book(book_id=1)
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+class TestUpdateSuperUserSingleBook:
+    def test_if_user_is_annonymous_reutrns_401(self, super_user_update_single_book):
+        response = super_user_update_single_book(book_id=1, data={})
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_if_user_is_not_admin_returns_403(self, user, api_client, super_user_update_single_book):
+        api_client.force_authenticate(user=user)
+        response = super_user_update_single_book(book_id=1, data={})
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_if_user_is_admin_update_returns_200(self, staff_user, api_client, super_user_update_single_book):
+        api_client.force_authenticate(user=staff_user)
+
+        user = baker.make(Profile)
+        category = baker.make(Category)
+
+        book = Book.objects.create(
+            title="asdf",
+            image=create_test_image(),
+            author="ehbdf",
+            translator="asdf",
+            publisher="sdafg",
+            volume_number=12,
+            publication_year=1400,
+            page_count=150,
+            owner=user,
+            description="sadsda",
+            category=category,
+            count=5
+        )
+
+        updated_data = {
+            'id': book.id,
+            'title': "asdf",
+            'image': create_test_image(),
+            'author': "ehbdf",
+            'translator': "asdf",
+            'publisher': "sdafg",
+            'volume_number': 12,
+            'publication_year': 1400,
+            'page_count': 150,
+            'owner': user.id,
+            'description': "sadsda",
+            'category': category.id,
+            'count': 5
+        }
+
+        response = super_user_update_single_book(book_id=book.id, data=updated_data)
+
+        print(response.data)
+
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_if_user_is_admin_but_data_is_invalid_returns_400(self, staff_user, api_client,
+                                                              super_user_update_single_book):
+        api_client.force_authenticate(user=staff_user)
+
+        user = baker.make(Profile)
+        category = baker.make(Category)
+
+        book = Book.objects.create(
+            title="asdf",
+            image=create_test_image(),
+            author="ehbdf",
+            translator="asdf",
+            publisher="sdafg",
+            volume_number=12,
+            publication_year=1400,
+            page_count=150,
+            owner=user,
+            description="sadsda",
+            category=category,
+            count=5
+        )
+
+        updated_data = {
+            'id': book.id,
+            'title': "asdf",
+            'image': create_test_image(),
+            'author': "ehbdf",
+            'translator': "asdf",
+            'publisher': "sdafg",
+            'volume_number': 12,
+            'publication_year': 999999,
+            'page_count': 150,
+            'owner': user.id,
+            'description': "sadsda",
+            'category': category.id,
+            'count': 5
+        }
+
+        response = super_user_update_single_book(book_id=book.id, data=updated_data)
+
+        print(response.data)
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_user_is_admin_but_book_does_not_exists_returns_404(self, api_client, staff_user,
+                                                                super_user_update_single_book):
+        api_client.force_authenticate(user=staff_user)
+
+        response = super_user_update_single_book(book_id=900, data={})
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
