@@ -1,11 +1,4 @@
-from http.client import responses
-
-from django.utils.encoding import force_str
 from model_bakery import baker
-from urllib3 import request
-
-from core.models import Profile
-from core.utils import create_test_image
 from rest_framework import status
 import pytest
 
@@ -58,6 +51,22 @@ def user_update_single_reviews(api_client):
         return api_client.put(f'/user/reviews/{review_id}/', data=data)
 
     return update_single_reviews
+
+
+@pytest.fixture
+def user_get_books(api_client):
+    def get_books():
+        return api_client.get('/user/books/')
+
+    return get_books
+
+
+@pytest.fixture
+def user_get_single_book(api_client):
+    def get_single_book(book_id):
+        return api_client.get(f'/user/books/{book_id}/')
+
+    return get_single_book
 
 
 @pytest.mark.django_db
@@ -173,3 +182,39 @@ class TestUpdateSingleReviews:
         response = user_update_single_reviews(review_id=review.id, data=updated_data)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+class TestGetUserBooks:
+    def test_if_user_is_annonymous_returns_401(self, user_get_books):
+        response = user_get_books()
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_if_user_is_authenticated_returns_200(self, api_client, user, user_get_books):
+        api_client.force_authenticate(user=user)
+
+        response = user_get_books()
+
+        assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
+class TestGetSingleBook:
+    def test_if_user_is_annonymous_returns_401(self, user_get_single_book):
+        response = user_get_single_book(book_id=1)
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_if_user_is_authenticated_returns_200(self, api_client, user, user_get_single_book):
+        api_client.force_authenticate(user=user)
+        book = baker.make(Book)
+        response = user_get_single_book(book_id=book.id)
+
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_if_user_is_authenticated_but_retrieve_none_existing_book_404(self, api_client, user, user_get_single_book):
+        api_client.force_authenticate(user=user)
+        response = user_get_single_book(book_id=9999)
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
