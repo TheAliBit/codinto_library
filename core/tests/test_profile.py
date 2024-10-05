@@ -54,6 +54,14 @@ def super_user_update_single_user(api_client):
     return update_user
 
 
+@pytest.fixture
+def user_update_its_profile(api_client):
+    def update_user(data):
+        return api_client.put('/user/profile/', data=data)
+
+    return update_user
+
+
 @pytest.mark.django_db
 class TestCreateProfile:
     def test_if_user_is_anonymous_returns_401(self, api_client, super_user_create):
@@ -237,3 +245,45 @@ class TestUpdateUser:
         api_client.force_authenticate(user=staff_user)
         response = super_user_update_single_user(user_id=999, data={})
         assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+class TestUserUpdateItsProfile:
+    def test_if_user_is_annonymous_retruns_401(self, user_update_its_profile):
+        response = user_update_its_profile(data={})
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_if_user_updates_its_profile_returns_200(self, api_client, user, user_update_its_profile):
+        api_client.force_authenticate(user=user)
+        user = baker.make(Profile)
+        image = create_test_image()
+        updated_data = {
+            'username': user.id,
+            'password': 'testpassword',
+            'first_name': 'jamshit',
+            'last_name': 'jamshiti',
+            'email': 'test@gmail.com',
+            'telegram_id': 'test_id',
+            'phone_number': '09390605460',
+            'picture': image
+        }
+        response = user_update_its_profile(data=updated_data)
+
+        print(response.data)
+
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_if_data_is_not_valid_returns_400(self, user, api_client, user_update_its_profile):
+        api_client.force_authenticate(user)
+        user = baker.make(Profile)
+
+        updated_data = {
+            'username': user.id,
+            'password': '',
+            'first_name': 'jamshit',
+            'last_name': 'jamshiti',
+        }
+
+        response = user_update_its_profile(data=updated_data)
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
