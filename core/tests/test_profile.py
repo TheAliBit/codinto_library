@@ -269,8 +269,6 @@ class TestUserUpdateItsProfile:
         }
         response = user_update_its_profile(data=updated_data)
 
-        print(response.data)
-
         assert response.status_code == status.HTTP_200_OK
 
     def test_if_data_is_not_valid_returns_400(self, user, api_client, user_update_its_profile):

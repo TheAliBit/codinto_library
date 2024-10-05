@@ -1,5 +1,7 @@
+from model_bakery import baker
 from rest_framework.test import APIClient
 import pytest
+from core.utils import create_test_image
 from core.models import Profile
 
 
