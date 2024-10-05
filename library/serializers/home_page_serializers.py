@@ -114,6 +114,16 @@ class BookSerializerForAdmin(serializers.ModelSerializer):
                 raise ValidationError("!کتابی با این نام موجود هست")
         return value
 
+    def validate_publication_year(self, value):
+        current_shamsi_year = jdatetime.datetime.now().year
+
+        if value < 1300:
+            raise ValidationError("! تاریخ انتشار نمیتواند زمانی قبل تر از سال 1300 باشد")
+        elif value > current_shamsi_year:
+            raise ValidationError("! تاریخ انتشار نمیتواند زمانی بعد تر از تاریخ حال حاظر باشد")
+        else:
+            return value
+
 
 class BookAvailableRemainderSerializer(serializers.ModelSerializer):
     class Meta:
