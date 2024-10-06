@@ -15,3 +15,4 @@ celerybeat-schedule
 !/celerybeat-schedule.db
 !/celerybeat-schedule.dat
 !/celerybeat-schedule.bak
+ qodana.yaml
