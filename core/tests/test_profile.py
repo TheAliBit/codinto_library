@@ -1,9 +1,13 @@
 from model_bakery import baker
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from core.models import Profile
 from core.utils import create_test_image
 from rest_framework import status
 import pytest
+
+
+# from library.tests.conftest import api_client
 
 
 @pytest.fixture
@@ -60,6 +64,30 @@ def user_update_its_profile(api_client):
         return api_client.put('/user/profile/', data=data)
 
     return update_user
+
+
+@pytest.fixture
+def user_post_login(api_client):
+    def post_login(data):
+        return api_client.post('/user/login/', data=data)
+
+    return post_login
+
+
+@pytest.fixture
+def user_post_refresh(api_client):
+    def post_refresh(data):
+        return api_client.post('/user/refresh/', data=data)
+
+    return post_refresh
+
+
+@pytest.fixture
+def user_post_logout(api_client):
+    def post_logout(data):
+        return api_client.post('/user/logout/', data=data)
+
+    return post_logout
 
 
 @pytest.mark.django_db
@@ -285,3 +313,114 @@ class TestUserUpdateItsProfile:
         response = user_update_its_profile(data=updated_data)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+class TestPostUserLogin:
+    def test_if_user_returns_200(self, user_post_login):
+        profile = Profile.objects.create(
+            username='test',
+            first_name='jamshit',
+            last_name='jamshiti',
+            email='test@gmail.com',
+            telegram_id='test_id',
+            phone_number='09390605460',
+            picture=create_test_image()
+        )
+
+        profile.set_password('shift7833')
+        profile.save()
+
+        post_data = {
+            'username': 'test',
+            'password': 'shift7833',
+        }
+
+        response = user_post_login(data=post_data)
+
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_if_not_user_returns_400(self, user_post_login):
+        post_data = {
+            'username': 'test',
+            'password': 'shift7833',
+        }
+
+        response = user_post_login(data=post_data)
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+class TestPostRefresh:
+    def test_if_user_is_annonymous_retruns_401(self, user_post_refresh):
+        response = user_post_refresh(data={})
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_if_user_but_token_is_invalid_reutrns_400(self, user_post_refresh, api_client, user):
+        api_client.force_authenticate(user=user)
+        response = user_post_refresh(data={})
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_if_user_and_token_returns_200(self, user_post_refresh, api_client, user):
+        api_client.force_authenticate(user=user)
+
+        profile = Profile.objects.create(
+            username='test',
+            first_name='jamshit',
+            last_name='jamshiti',
+            email='test@gmail.com',
+            telegram_id='test_id',
+            phone_number='09390605460',
+            picture=create_test_image()
+        )
+
+        profile.set_password('shift7833')
+        profile.save()
+
+        refresh_token = RefreshToken.for_user(profile)
+
+        refresh_token = {
+            'refresh': str(refresh_token)
+        }
+
+        response = user_post_refresh(data=refresh_token)
+        assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
+class TestUserLogout:
+    def test_if_user_is_annonymous_returns_401(self, user_post_logout):
+        response = user_post_logout(data={})
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_if_user_but_token_is_invalid_reutrns_400(self, user_post_logout, api_client, user):
+        api_client.force_authenticate(user=user)
+        response = user_post_logout(data={})
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_if_user_and_token_returns_200(self, user_post_logout, api_client, user):
+        api_client.force_authenticate(user=user)
+
+        profile = Profile.objects.create(
+            username='test',
+            first_name='jamshit',
+            last_name='jamshiti',
+            email='test@gmail.com',
+            telegram_id='test_id',
+            phone_number='09390605460',
+            picture=create_test_image()
+        )
+
+        profile.set_password('shift7833')
+        profile.save()
+
+        refresh_token = RefreshToken.for_user(profile)
+
+        logout_data = {
+            'refresh': str(refresh_token)
+        }
+
+        response = user_post_logout(data=logout_data)
+
+        assert response.status_code == status.HTTP_200_OK

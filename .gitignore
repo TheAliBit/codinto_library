@@ -16,3 +16,4 @@ celerybeat-schedule
 !/celerybeat-schedule.dat
 !/celerybeat-schedule.bak
  qodana.yaml
+/qodana.yaml
