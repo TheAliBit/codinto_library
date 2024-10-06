@@ -128,6 +128,22 @@ def super_user_post_category(api_client):
     return post_category
 
 
+@pytest.fixture
+def super_user_delete_single_category(api_client):
+    def delete_single_category(category_id):
+        return api_client.delete(f'/category/{category_id}/')
+
+    return delete_single_category
+
+
+@pytest.fixture
+def super_user_update_single_category(api_client):
+    def update_single_category(category_id, data):
+        return api_client.put(f'/category/{category_id}/', data=data)
+
+    return update_single_category
+
+
 @pytest.mark.django_db
 class TestGetSuperUserRequests:
     def test_if_user_is_annonymous_returns_401(self, super_user_get_requests):
@@ -660,4 +676,82 @@ class TestPostSuperUserCategory:
         post_data = {}
 
         response = super_user_post_category(data=post_data)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+class TestDeleteSuperUserCategory:
+    def test_if_user_is_annonymous_returns_401(self, super_user_delete_single_category):
+        response = super_user_delete_single_category(category_id=1)
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_if_user_is_not_admin_returns_403(self, user, api_client, super_user_delete_single_category):
+        api_client.force_authenticate(user=user)
+        response = super_user_delete_single_category(category_id=1)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_if_user_is_admin_retruns_204(self, staff_user, api_client, super_user_delete_single_category):
+        api_client.force_authenticate(user=staff_user)
+
+        category = baker.make(Category)
+        response = super_user_delete_single_category(category_id=category.id)
+
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    def test_if_user_is_admin_but_category_is_not_exists_returns_404(self, staff_user, api_client,
+                                                                     super_user_delete_single_category):
+        api_client.force_authenticate(user=staff_user)
+
+        response = super_user_delete_single_category(category_id=1)
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+class TestUpdateSuperUserSingleCategory:
+    def test_if_user_is_annonymous_returns_401(self, super_user_update_single_category):
+        response = super_user_update_single_category(category_id=1, data={})
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_if_user_is_not_admin_returns_403(self, user, api_client, super_user_update_single_category):
+        api_client.force_authenticate(user=user)
+
+        response = super_user_update_single_category(category_id=1, data={})
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_if_user_is_admin_retruns_200(self, staff_user, api_client, super_user_update_single_category):
+        api_client.force_authenticate(user=staff_user)
+
+        category = baker.make(Category)
+
+        updated_data = {
+            'title': 'test_category',
+        }
+
+        response = super_user_update_single_category(category_id=category.id, data=updated_data)
+
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_if_user_is_admin_but_category_does_not_exitsts_returns_404(self, staff_user, api_client,
+                                                                        super_user_update_single_category):
+        api_client.force_authenticate(user=staff_user)
+
+        updated_data = {}
+
+        response = super_user_update_single_category(category_id=1, data=updated_data)
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_if_user_is_admin_but_data_is_invalid_retutrns_400(self, staff_user, api_client,
+                                                               super_user_update_single_category):
+        api_client.force_authenticate(user=staff_user)
+        category = baker.make(Category)
+
+        updated_data = {
+        }
+
+        response = super_user_update_single_category(category_id=category.id, data=updated_data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
