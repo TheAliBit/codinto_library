@@ -8,13 +8,15 @@ class SimpleCategoryListSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'parent']
 
     def validate_parent(self, value):
-        if value and value == self.instance.parent:
-            raise serializers.ValidationError('! کتگوری نمی تواند زیرکتگوری خودش باشد')
+        if self.instance:  # Ensure we're updating, not creating
+            if value == self.instance:
+                raise serializers.ValidationError('! کتگوری نمی تواند زیرکتگوری خودش باشد')
         return value
 
     def validate_title(self, value):
-        if value and value == self.instance.title:
-            raise serializers.ValidationError('! عنوان کتگوری تکراری است')
+        if self.instance:  # Ensure we're updating, not creating
+            if value == self.instance.title:
+                raise serializers.ValidationError('! عنوان کتگوری تکراری است')
         return value
 
 
