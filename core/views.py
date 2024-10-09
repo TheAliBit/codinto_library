@@ -78,15 +78,15 @@ class ProfileUpdateView(mixins.RetrieveModelMixin,
         new_username = request.data.get('username')
         currernt_username = self.request.user.username
 
-        new_phone_number = request.data.get('phone_number')
-        current_phone_number = self.request.user.phone_number
+        # new_phone_number = request.data.get('phone_number')
+        # current_phone_number = self.request.user.phone_number
         if new_username and new_username != currernt_username:
             if Profile.objects.filter(username=new_username).exists():
                 raise ValidationError({'error': "!نام کاربری باید یکتا باشد"})
 
-        if new_phone_number and new_phone_number != current_phone_number:
-            if Profile.objects.filter(phone_number=new_phone_number).exists():
-                raise ValidationError("!کاربری با این شماره تلفن وجود دارد")
+        # if new_phone_number and new_phone_number != current_phone_number:
+        #     if Profile.objects.filter(phone_number=new_phone_number).exists():
+        #         raise ValidationError("!کاربری با این شماره تلفن وجود دارد")
 
         return self.update(request, *args, **kwargs)
 

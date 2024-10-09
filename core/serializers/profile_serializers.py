@@ -9,9 +9,8 @@ from core.models import Profile
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['id', 'username', 'password', 'first_name', 'last_name', 'phone_number', 'email', 'telegram_id',
-                  'picture']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ['id', 'username', 'first_name', 'last_name', 'phone_number', 'email', 'telegram_id', 'picture', 'password']
+        extra_kwargs = {'password': {'write_only': True}}  # Add password here as write-only
 
     def to_representation(self, instance):
         result = super().to_representation(instance)
@@ -25,10 +24,26 @@ class ProfileSerializer(serializers.ModelSerializer):
         if not value.startswith('09'):
             raise ValidationError("! شماره تلفن باید با 09 شروع شود")
 
-        if Profile.objects.filter(phone_number=value).exists():
-            raise ValidationError("! کاربری با این شماره تلفن وجود دارد")
+        # Check for unique phone numbers (uncomment if needed)
+        # if Profile.objects.filter(phone_number=value).exclude(id=self.instance.id).exists():
+        #     raise ValidationError("! کاربری با این شماره تلفن وجود دارد")
 
         return value
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')  # Fix typo in 'password'
+        user = Profile(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        instance = super().update(instance, validated_data)
+        if password:
+            instance.set_password(password)
+            instance.save()
+        return instance
 
     def create(self, validated_data):
         passwrod = validated_data.pop('password')

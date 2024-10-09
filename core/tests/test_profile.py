@@ -182,10 +182,10 @@ class TestRetrieveUserDetail:
     def test_if_user_is_admin_returns_200(self, api_client, staff_user, super_user_get_single_user):
         api_client.force_authenticate(user=staff_user)
         user = baker.make(Profile)
+
         response = super_user_get_single_user(user_id=user.id)
 
         assert response.status_code == status.HTTP_200_OK
-
         assert response.data['id'] == user.id
 
 
@@ -209,7 +209,7 @@ class TestDeleteUser:
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
-        assert Profile.objects.filter(id=user.id).exists() is False
+        assert not Profile.objects.filter(id=user.id).exists()
 
     def test_if_user_does_not_exist_returns_404(self, api_client, staff_user, super_user_delete_single_user):
         api_client.force_authenticate(user=staff_user)

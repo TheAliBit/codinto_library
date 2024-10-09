@@ -19,6 +19,3 @@ def staff_user():
                                        is_staff=True)
 
 
-@pytest.fixture
-def super_user_list_create_url():
-    return '/super-user/users/'
