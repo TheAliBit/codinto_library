@@ -17,3 +17,4 @@ celerybeat-schedule
 !/celerybeat-schedule.bak
  qodana.yaml
 /qodana.yaml
+/dump.rdb
